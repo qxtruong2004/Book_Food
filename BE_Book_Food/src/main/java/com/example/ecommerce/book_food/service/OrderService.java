@@ -2,6 +2,7 @@ package com.example.ecommerce.book_food.service;
 
 import com.example.ecommerce.book_food.Enum.OrderStatus;
 import com.example.ecommerce.book_food.dto.request.CreateOrderRequest;
+import com.example.ecommerce.book_food.dto.request.OrderItemRequest;
 import com.example.ecommerce.book_food.dto.respone.OrderResponse;
 import com.example.ecommerce.book_food.entity.*;
 import com.example.ecommerce.book_food.exception.FoodNotAvailableException;
@@ -33,7 +34,9 @@ public class OrderService {
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
 
+    //tạo order
     public OrderResponse createOrder(CreateOrderRequest request, Long userId) throws UserNotFoundException, FoodNotFoundException, FoodNotAvailableException {
+        //kiểm tra user
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
@@ -46,20 +49,22 @@ public class OrderService {
                 .estimatedDeliveryTime(LocalDateTime.now().plusMinutes(30))
                 .build();
 
+        // xử lý danh sách món ăn
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
 
-        for (CreateOrderRequest.OrderItemRequest itemRequest : request.getItems()) {
+        for (OrderItemRequest itemRequest : request.getItems()) {
+            //kiểm tra món có tồn tại khog
             Food food = foodRepository.findById(itemRequest.getFoodId())
                     .orElseThrow(() -> new FoodNotFoundException("Food not found with id: " + itemRequest.getFoodId()));
-
-            if (!food.getIsAvailable()) {
+            if (!food.getIsAvailable()) { //kiem tra món có còn bán không
                 throw new FoodNotAvailableException("Food is not available: " + food.getName());
             }
 
             BigDecimal itemTotal = food.getPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
             totalAmount = totalAmount.add(itemTotal);
 
+            //khởi tạo order
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
                     .food(food)
@@ -79,20 +84,24 @@ public class OrderService {
         return orderMapper.toResponse(savedOrder);
     }
 
+    //lay danh sách order của user
     public List<OrderResponse> getUserOrders(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         List<Order> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
         return orderMapper.toResponseList(orders);
     }
 
+    //cập nhật trạng thái order
     public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus) throws OrderNotFoundException {
+        //tìm kiếm order
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
 
         order.setStatus(newStatus);
 
         if (newStatus == OrderStatus.PREPARING) {
-            // Calculate estimated delivery time based on preparation time
+            // Tính lại estimatedDeliveryTime dựa trên tổng thời gian chế biến
+            //Tổng thời gian chế biến = Σ (thời gian chế biến món × số lượng).
             int totalPrepTime = order.getOrderItems().stream()
                     .mapToInt(item -> item.getFood().getPreparationTime() * item.getQuantity())
                     .sum();

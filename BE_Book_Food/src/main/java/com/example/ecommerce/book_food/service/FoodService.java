@@ -34,12 +34,15 @@ public class FoodService {
         List<Food> foods = foodRepository.findByIsAvailableTrueOrderByCreatedAtDesc(pageable);
         return foodMapper.toResponseList(foods);
     }
+
+    //lay danh sach mon an theo category
     public List<FoodResponse> getFoodsByCategory(Long categoryId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         List<Food> foods = foodRepository.findByCategoryIdAndIsAvailableTrue(categoryId, pageable);
         return foodMapper.toResponseList(foods);
     }
 
+    //tạo món ăn mới
     public FoodResponse createFood(CreateFoodRequest request) throws CategoryNotFoundException {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + request.getCategoryId()));
@@ -59,16 +62,19 @@ public class FoodService {
         return foodMapper.toResponse(savedFood);
     }
 
+    //tìm kiếm món ăn
     public List<FoodResponse> searchFoods(String keyword, Long categoryId,
                                           BigDecimal minPrice, BigDecimal maxPrice,
                                           int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
+        //nếu dùng keyword tìm kiếm
         if (keyword != null && !keyword.trim().isEmpty()) {
             List<Food> foods = foodRepository.findByNameContainingIgnoreCaseAndIsAvailableTrue(keyword, pageable);
             return foodMapper.toResponseList(foods);
         }
 
+        //nếu không có kw thì lọc theo category và khoảng giá
         List<Food> foods = foodRepository.findFoodsWithFilters(categoryId, minPrice, maxPrice, pageable);
         return foodMapper.toResponseList(foods);
     }

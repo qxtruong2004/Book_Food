@@ -8,6 +8,9 @@ import lombok.Data;
 @Data
 public class UserRegisterRequest {
     @NotBlank
+    private String fullName; // thêm trường này
+
+    @NotBlank
     private String username;
 
     @NotBlank

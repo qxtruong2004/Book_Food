@@ -1,6 +1,7 @@
 package com.example.ecommerce.book_food.repository;
 
 import com.example.ecommerce.book_food.entity.Review;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,7 +12,8 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // Lấy review theo food (món ăn)
-    List<Review> findByFoodIdOrderByCreatedAtDesc(Long foodId, Pageable pageable);
+    Page<Review> findByFoodIdOrderByCreatedAtDesc(Long foodId, Pageable pageable);
+
 
     // Lấy review của user
     List<Review> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);

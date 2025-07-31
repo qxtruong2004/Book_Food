@@ -17,10 +17,12 @@ public class FoodMapper {
         this.modelMapper = modelMapper;
     }
 
+    //chuyển đổi 1 food sang food response
     public FoodResponse toResponse(Food food) {
         return modelMapper.map(food, FoodResponse.class);
     }
 
+    //chuyển đổi danh sách food sang ds food respone
     public List<FoodResponse> toResponseList(List<Food> foods) {
         if (foods == null) return new ArrayList<>();
         return foods.stream()
