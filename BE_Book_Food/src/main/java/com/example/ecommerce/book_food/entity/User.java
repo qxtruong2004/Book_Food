@@ -56,6 +56,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @NotNull(message = "Role cannot be null")
+    @Builder.Default
     private UserRole role = UserRole.USER;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

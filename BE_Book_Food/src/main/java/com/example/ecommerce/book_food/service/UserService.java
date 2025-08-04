@@ -14,6 +14,8 @@ import com.example.ecommerce.book_food.repository.FoodRepository;
 import com.example.ecommerce.book_food.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+//import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +26,7 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    //private final PasswordEncoder passwordEncoder; // nếu bạn có Spring Security
+    private final PasswordEncoder passwordEncoder; // nếu bạn có Spring Security
 
     //Đăng kis
     public UserResponse register(UserRegisterRequest userRegisterRequest) throws EmailAlreadyExistsException, UserAlreadyExistsException {
@@ -39,7 +41,8 @@ public class UserService {
                 .fullName(userRegisterRequest.getFullName())
                 .username(userRegisterRequest.getUsername())
                 .email(userRegisterRequest.getEmail())
-                .password(userRegisterRequest.getPassword())
+                //.password(userRegisterRequest.getPassword())
+                .password(passwordEncoder.encode(userRegisterRequest.getPassword()))
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -50,7 +53,7 @@ public class UserService {
     public UserResponse login(UserLoginRequest userLoginRequest) throws UserNotFoundException {
         User user = userRepository.findByUsername(userLoginRequest.getUsername())
                 .orElseThrow(() -> new UserNotFoundException("Username not found: " + userLoginRequest.getUsername()));
-        if(!user.getPassword().equals(userLoginRequest.getPassword())) {
+        if(!passwordEncoder.matches(userLoginRequest.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid password");
         }
         return userMapper.toResponse(user);

@@ -1,0 +1,68 @@
+package com.example.ecommerce.book_food.controller;
+
+import com.example.ecommerce.book_food.dto.respone.ApiResponse;
+import com.example.ecommerce.book_food.dto.respone.FoodResponse;
+import com.example.ecommerce.book_food.entity.Food;
+import com.example.ecommerce.book_food.service.FoodService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/foods")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "${cors.allowed-origins}")
+public class FoodController {
+    private final FoodService foodService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<FoodResponse>>> getAllFoods(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        List<FoodResponse> foods = foodService.getAllFoods(page, size);
+        return ResponseEntity.ok(ApiResponse.success(foods));
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<ApiResponse<List<FoodResponse>>> getFoodsByCategory(
+            @PathVariable Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        List<FoodResponse> listFoods = foodService.getFoodsByCategory(categoryId, page, size);
+        return ResponseEntity.ok(ApiResponse.success(listFoods));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<FoodResponse>> getFoodById(@PathVariable Long id) {
+        FoodResponse foodResponse = foodService.getFoodById(id);
+        return ResponseEntity.ok(ApiResponse.success(foodResponse));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<FoodResponse>>> searchFoods(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        List<FoodResponse> listFoods = foodService.searchFoods(keyword, categoryId, minPrice, maxPrice, page, size);
+        return ResponseEntity.ok(ApiResponse.success(listFoods));
+    }
+
+    //thêm món ăn(dành cho admin)
+//    @PostMapping
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<ApiResponse<FoodResponse>> createFood(
+//            @Valid @RequestBody CreateFoodRequest request) {
+//        FoodResponse response = foodUseCase.createFood(request);
+//        return ResponseEntity.status(HttpStatus.CREATED)
+//                .body(ApiResponse.success(response));
+//    }
+
+}

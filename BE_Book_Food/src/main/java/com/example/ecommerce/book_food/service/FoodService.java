@@ -5,6 +5,7 @@ import com.example.ecommerce.book_food.dto.respone.FoodResponse;
 import com.example.ecommerce.book_food.entity.Category;
 import com.example.ecommerce.book_food.entity.Food;
 import com.example.ecommerce.book_food.exception.CategoryNotFoundException;
+import com.example.ecommerce.book_food.exception.FoodNotFoundException;
 import com.example.ecommerce.book_food.mapper.FoodMapper;
 import com.example.ecommerce.book_food.repository.CategoryRepository;
 import com.example.ecommerce.book_food.repository.FoodRepository;
@@ -35,8 +36,21 @@ public class FoodService {
         return foodMapper.toResponseList(foods);
     }
 
+    //lấy đồ ăn theo id
+    public FoodResponse getFoodById(long id) throws FoodNotFoundException {
+        Food food = foodRepository.findById(id)
+                .orElseThrow(() -> new FoodNotFoundException("Food not found with id: " +  id));
+        return foodMapper.toResponse(food);
+    }
+
     //lay danh sach mon an theo category
     public List<FoodResponse> getFoodsByCategory(Long categoryId, int page, int size) {
+        // Kiểm tra category có tồn tại không
+        boolean exists = categoryRepository.existsById(categoryId);
+        if (!exists) {
+            throw new CategoryNotFoundException("Category not found with id: " + categoryId);
+        }
+
         Pageable pageable = PageRequest.of(page, size);
         List<Food> foods = foodRepository.findByCategoryIdAndIsAvailableTrue(categoryId, pageable);
         return foodMapper.toResponseList(foods);
@@ -71,6 +85,9 @@ public class FoodService {
         //nếu dùng keyword tìm kiếm
         if (keyword != null && !keyword.trim().isEmpty()) {
             List<Food> foods = foodRepository.findByNameContainingIgnoreCaseAndIsAvailableTrue(keyword, pageable);
+            if(foods.isEmpty()){
+                throw new FoodNotFoundException("Food not found with name: " + keyword);
+            }
             return foodMapper.toResponseList(foods);
         }
 

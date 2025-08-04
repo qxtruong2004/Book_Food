@@ -5,6 +5,7 @@ import com.example.ecommerce.book_food.dto.request.UpdateCategoryRequest;
 import com.example.ecommerce.book_food.dto.respone.CategoryResponse;
 import com.example.ecommerce.book_food.entity.Category;
 import com.example.ecommerce.book_food.exception.CategoryAlreadyExistsException;
+import com.example.ecommerce.book_food.exception.CategoryHasFoodsException;
 import com.example.ecommerce.book_food.exception.CategoryNotFoundException;
 import com.example.ecommerce.book_food.mapper.CategoryMapper;
 import com.example.ecommerce.book_food.repository.CategoryRepository;
@@ -61,13 +62,13 @@ public class CategoryService {
     }
 
     //Xóa danh mục (nếu không chứa món ăn).
-    public void deleteCategory(Long id) throws CategoryNotFoundException {
+    public void deleteCategory(Long id) throws CategoryHasFoodsException {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + id));
 
         //kiểm tra xem category này có chứa món ăn không
         if(category.getFoods() != null && !category.getFoods().isEmpty()) {
-            throw new RuntimeException("Cannot delete category because it contains foods");
+            throw new CategoryHasFoodsException("Cannot delete category because it contains foods");
         }
         categoryRepository.delete(category);
 

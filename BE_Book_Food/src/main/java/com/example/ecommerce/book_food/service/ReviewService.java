@@ -7,6 +7,7 @@ import com.example.ecommerce.book_food.entity.Review;
 import com.example.ecommerce.book_food.entity.User;
 import com.example.ecommerce.book_food.exception.FoodNotFoundException;
 import com.example.ecommerce.book_food.exception.ReviewNotFoundException;
+import com.example.ecommerce.book_food.exception.ReviewOwnershipException;
 import com.example.ecommerce.book_food.exception.UserNotFoundException;
 import com.example.ecommerce.book_food.mapper.ReviewMapper;
 import com.example.ecommerce.book_food.repository.FoodRepository;
@@ -50,13 +51,19 @@ public class ReviewService {
 
     //lấy review theo món ăn
     public List<ReviewResponse> getReviewsByFood(Long foodId, int page, int size) {
+        //kiểm tra món ăn có tồn tại không
+        boolean exists = foodRepository.existsById(foodId);
+        if(!exists){
+            throw new FoodNotFoundException("Food not found with id: " + foodId);
+        }
+
         Pageable pageable = PageRequest.of(page, size);
         Page<Review> reviewPage = reviewRepository.findByFoodIdOrderByCreatedAtDesc(foodId, pageable);
         return reviewMapper.toResponeList(reviewPage.getContent());
     }
 
     //xóa review
-    public void deleteReview(Long reviewId, Long userId) throws UserNotFoundException, ReviewNotFoundException {
+    public void deleteReview(Long reviewId, Long userId) throws UserNotFoundException, ReviewNotFoundException, ReviewOwnershipException {
         //kiểm tra người dùng có tồn tại không
         if(!userRepository.existsById(userId)) {
             throw new UserNotFoundException("User not found with id: " + userId);
@@ -66,7 +73,7 @@ public class ReviewService {
 
         //kiểm tra xem người dùng có là chủ của review không
         if (!review.getUser().getId().equals(userId)) {
-            throw new RuntimeException("You are not allowed to delete this review");
+            throw new ReviewOwnershipException("You are not allowed to delete this review");
         }
         reviewRepository.deleteById(reviewId);
 

@@ -86,6 +86,11 @@ public class OrderService {
 
     //lay danh sách order của user
     public List<OrderResponse> getUserOrders(Long userId, int page, int size) {
+
+        boolean exists = userRepository.existsById(userId);
+        if (!exists) {
+            throw new UserNotFoundException("User not found with id: " + userId);
+        }
         Pageable pageable = PageRequest.of(page, size);
         List<Order> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
         return orderMapper.toResponseList(orders);

@@ -1,5 +1,7 @@
 package com.example.ecommerce.book_food.exception;
 
-public class UserNotFoundException extends Exception{
-    public UserNotFoundException(String s){}
+public class UserNotFoundException extends RuntimeException{
+    public UserNotFoundException(String s){
+        super(s);
+    }
 }
