@@ -1,6 +1,7 @@
 package com.example.ecommerce.book_food.entity;
 
 import com.example.ecommerce.book_food.Enum.UserRole;
+import com.example.ecommerce.book_food.Enum.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -74,4 +75,8 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING) // lưu tên enum vào DB
+    @Column(nullable = false, length = 20)
+    private UserStatus status = UserStatus.ACTIVE; // mặc định ACTIVE
 }

@@ -1,6 +1,7 @@
 package com.example.ecommerce.book_food.service;
 
 import com.example.ecommerce.book_food.Enum.UserRole;
+import com.example.ecommerce.book_food.Enum.UserStatus;
 import com.example.ecommerce.book_food.dto.request.UpdateUserRequest;
 import com.example.ecommerce.book_food.dto.request.UserLoginRequest;
 import com.example.ecommerce.book_food.dto.request.UserRegisterRequest;
@@ -26,6 +27,7 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+
     private final PasswordEncoder passwordEncoder; // nếu bạn có Spring Security
 
     //Đăng kis
@@ -43,6 +45,7 @@ public class UserService {
                 .email(userRegisterRequest.getEmail())
                 //.password(userRegisterRequest.getPassword())
                 .password(passwordEncoder.encode(userRegisterRequest.getPassword()))
+                .status(UserStatus.ACTIVE)
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -76,37 +79,52 @@ public class UserService {
     //Lấy thông tin User theo ID
     public UserResponse getUserById(Long id) throws UserNotFoundException {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User Not Found: " + id));
+                .orElseThrow(() -> new UserNotFoundException("User not found with: " + id));
         return userMapper.toResponse(user);
     }
 
     //Cập nhật thông tin User.
     public UserResponse updateUser(Long id, UpdateUserRequest request) throws UserNotFoundException{
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User Not Found: " + id));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         user.setFullName(request.getName());
         user.setPhone(request.getPhone());
         user.setEmail(request.getEmail());
         user.setAddress(request.getAddress());
         //nếu không null hoặc không phải chuỗi rỗng
         if(request.getPassword() != null && !request.getPassword().isBlank()) {
-            user.setPassword(request.getPassword());
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
         User updatedUser = userRepository.save(user);
         return userMapper.toResponse(updatedUser);
     }
 
     //Xóa User hoặc vô hiệu hóa User.
-    public void deleteUser(Long id) throws UserNotFoundException{
-        if(!userRepository.existsById(id)){
-            throw new UserNotFoundException("User not found with id: " + id);
-        }
-        userRepository.deleteById(id);
+    public UserResponse deleteUser(Long id) throws UserNotFoundException{
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        user.setStatus(UserStatus.BLOCKED); // vô hiệu hóa thay vì xóa
+        userRepository.save(user);
+        return userMapper.toResponse(user);
     }
 
     //Lấy danh sách tất cả user
     public List<UserResponse>getAllUsers(){
         return userRepository.findAll().stream()
+                .map(userMapper::toResponse)
+                .toList();
+    }
+
+    //Lấy danh sách các user bị khóa
+    public List<UserResponse> getBlockedUsers(){
+        return userRepository.findByStatus(UserStatus.BLOCKED).stream()
+                .map(userMapper::toResponse)
+                .toList();
+    }
+
+    //Lấy danh sách các user còn hoạt động
+    public List<UserResponse> getActiveUsers(){
+        return userRepository.findByStatus(UserStatus.ACTIVE).stream()
                 .map(userMapper::toResponse)
                 .toList();
     }

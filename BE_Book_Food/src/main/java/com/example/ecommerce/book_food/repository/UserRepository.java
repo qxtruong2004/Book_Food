@@ -1,8 +1,10 @@
 package com.example.ecommerce.book_food.repository;
 
+import com.example.ecommerce.book_food.Enum.UserStatus;
 import com.example.ecommerce.book_food.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -15,4 +17,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Kiểm tra username đã tồn tại chưa
     boolean existsByUsername(String username);
+
+    List<User> findByStatus(UserStatus status);
 }
