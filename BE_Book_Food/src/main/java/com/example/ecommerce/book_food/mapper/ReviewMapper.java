@@ -17,7 +17,12 @@ public class ReviewMapper {
     }
     //chuyển đổi review sang review respone
     public ReviewResponse toRespone(Review review) {
-        return modelMapper.map(review, ReviewResponse.class);
+        return ReviewResponse.builder()
+                .id(review.getId())
+                .rating(review.getRating())
+                .comment(review.getComment())
+                .username(review.getUser() != null ? review.getUser().getUsername() : null)
+                .build();
     }
 
     //chuyen đổi 1 list review sang list review respone

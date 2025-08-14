@@ -17,6 +17,9 @@ public class CreateReviewRequest {
     @Min(1) @Max(5)
     private BigDecimal rating;
 
+    @NotNull
+    private Long orderId; // thêm trường này
+
     @Size(max = 500)
     private String comment;
 }

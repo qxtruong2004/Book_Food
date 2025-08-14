@@ -16,7 +16,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
 
     // Lấy review của user
-    List<Review> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+    Page<Review> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
     // Tính trung bình rating của 1 món ăn
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.food.id = :foodId")

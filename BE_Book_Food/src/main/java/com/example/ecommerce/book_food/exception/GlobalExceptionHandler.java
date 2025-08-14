@@ -88,4 +88,10 @@ public class GlobalExceptionHandler {
         String errorMessage = ex.getBindingResult().getFieldError().getDefaultMessage();
         return ResponseEntity.ok(ApiResponse.fail("Validation error: " + errorMessage));
     }
+
+    //Lỗi khi Order không chứa món ăn cần tìm
+    @ExceptionHandler(OrderDoesNotContainFoodException.class)
+    public ResponseEntity<ApiResponse<Object>> handleOrderDoesNotContainFood(OrderDoesNotContainFoodException e) {
+        return ResponseEntity.ok(ApiResponse.fail(e.getMessage()));
+    }
 }
