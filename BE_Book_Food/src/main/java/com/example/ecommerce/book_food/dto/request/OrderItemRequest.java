@@ -20,6 +20,5 @@ public class OrderItemRequest {
     @Max(value = 10, message = "Quantity cannot exceed 10")
     private Integer quantity;
 
-    @Size(max = 100, message = "Special instructions cannot exceed 100 characters")
-    private String specialInstructions;
+
 }

@@ -11,6 +11,10 @@ import com.example.ecommerce.book_food.mapper.CategoryMapper;
 import com.example.ecommerce.book_food.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -54,11 +58,17 @@ public class CategoryService {
     }
 
     //Lấy danh sách tất cả danh mục.
-    public List<CategoryResponse> getAllCategories() {
-        return categoryRepository.findAll()
-                .stream()
-                .map(categoryMapper::toRespone)
-                .toList();
+    public Page<CategoryResponse> getAllCategories(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending()); // sắp xếp theo id tăng dần
+        Page<Category> categoryPage = categoryRepository.findAll(pageable);
+        return categoryPage.map(categoryMapper::toRespone);
+    }
+
+    //Lấy danh mục theo id
+    public CategoryResponse getCategoryById(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + id));
+        return categoryMapper.toRespone(category);
     }
 
     //Xóa danh mục (nếu không chứa món ăn).
@@ -72,6 +82,11 @@ public class CategoryService {
         }
         categoryRepository.delete(category);
 
+    }
+
+    //đếm tổng số category
+    public long countCategories(){
+        return categoryRepository.countCategories();
     }
 
 }

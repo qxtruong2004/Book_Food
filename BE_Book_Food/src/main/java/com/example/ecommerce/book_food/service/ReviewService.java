@@ -102,15 +102,15 @@ public class ReviewService {
         return reviewMapper.toResponeList(reviewPage.getContent());
     }
 
-    //tính trung bình rating theo món ăn
-    public Double averageRating(Long foodId) throws FoodNotFoundException {
-        boolean exists = foodRepository.existsById(foodId);
-        if(!exists){
-            throw new FoodNotFoundException("Food not found with id: " + foodId);
-        }
-        Double averageRating = reviewRepository.getAverageRatingByFood(foodId);
-        return averageRating != null ? averageRating : 0.0;
-    }
+//    //tính trung bình rating theo món ăn
+//    public Double averageRating(Long foodId) throws FoodNotFoundException {
+//        boolean exists = foodRepository.existsById(foodId);
+//        if(!exists){
+//            throw new FoodNotFoundException("Food not found with id: " + foodId);
+//        }
+//        Double averageRating = reviewRepository.getAverageRatingByFood(foodId);
+//        return averageRating != null ? averageRating : 0.0;
+//    }
 
     public FoodRatingSummaryRespone getFoodRatingSummary(Long foodId) throws FoodNotFoundException {
         boolean exists = foodRepository.existsById(foodId);
