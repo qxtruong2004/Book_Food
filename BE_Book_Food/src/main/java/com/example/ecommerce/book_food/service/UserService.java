@@ -30,38 +30,38 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder; // nếu bạn có Spring Security
 
-    //Đăng kis
-    public UserResponse register(UserRegisterRequest userRegisterRequest) throws EmailAlreadyExistsException, UserAlreadyExistsException {
-        if(userRepository.existsByEmail(userRegisterRequest.getEmail())) {
-            throw new EmailAlreadyExistsException("Email already exists: " + userRegisterRequest.getEmail());
-        }
-        if(userRepository.existsByUsername(userRegisterRequest.getUsername())) {
-            throw  new UserAlreadyExistsException("Username already exists: " + userRegisterRequest.getUsername());
-        }
-
-        User user = User.builder()
-                .fullName(userRegisterRequest.getFullName())
-                .username(userRegisterRequest.getUsername())
-                .email(userRegisterRequest.getEmail())
-                //.password(userRegisterRequest.getPassword())
-                .password(passwordEncoder.encode(userRegisterRequest.getPassword()))
-                .status(UserStatus.ACTIVE)
-                .build();
-
-        User savedUser = userRepository.save(user);
-        return userMapper.toResponse(savedUser);
-    }
-
-    //Đăng nhập
-    public UserResponse login(UserLoginRequest userLoginRequest) throws UserNotFoundException {
-        User user = userRepository.findByUsername(userLoginRequest.getUsername())
-                .orElseThrow(() -> new UserNotFoundException("Username not found: " + userLoginRequest.getUsername()));
-        if(!passwordEncoder.matches(userLoginRequest.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid password");
-        }
-        return userMapper.toResponse(user);
-
-    }
+//    //Đăng kis
+//    public UserResponse register(UserRegisterRequest userRegisterRequest) throws EmailAlreadyExistsException, UserAlreadyExistsException {
+//        if(userRepository.existsByEmail(userRegisterRequest.getEmail())) {
+//            throw new EmailAlreadyExistsException("Email already exists: " + userRegisterRequest.getEmail());
+//        }
+//        if(userRepository.existsByUsername(userRegisterRequest.getUsername())) {
+//            throw  new UserAlreadyExistsException("Username already exists: " + userRegisterRequest.getUsername());
+//        }
+//
+//        User user = User.builder()
+//                .fullName(userRegisterRequest.getFullName())
+//                .username(userRegisterRequest.getUsername())
+//                .email(userRegisterRequest.getEmail())
+//                //.password(userRegisterRequest.getPassword())
+//                .password(passwordEncoder.encode(userRegisterRequest.getPassword()))
+//                .status(UserStatus.ACTIVE)
+//                .build();
+//
+//        User savedUser = userRepository.save(user);
+//        return userMapper.toResponse(savedUser);
+//    }
+//
+//    //Đăng nhập
+//    public UserResponse login(UserLoginRequest userLoginRequest) throws UserNotFoundException {
+//        User user = userRepository.findByUsername(userLoginRequest.getUsername())
+//                .orElseThrow(() -> new UserNotFoundException("Username not found: " + userLoginRequest.getUsername()));
+//        if(!passwordEncoder.matches(userLoginRequest.getPassword(), user.getPassword())) {
+//            throw new RuntimeException("Invalid password");
+//        }
+//        return userMapper.toResponse(user);
+//
+//    }
 
     //đăng nhập có sử dụng spring security
 //    public AuthResponse login(LoginRequest request) {
