@@ -1,11 +1,16 @@
 package com.example.ecommerce.book_food.controller;
 
+import com.example.ecommerce.book_food.dto.request.CreateFoodRequest;
+import com.example.ecommerce.book_food.dto.request.UpdateFoodRequest;
 import com.example.ecommerce.book_food.dto.respone.ApiResponse;
 import com.example.ecommerce.book_food.dto.respone.FoodResponse;
 import com.example.ecommerce.book_food.entity.Food;
 import com.example.ecommerce.book_food.service.FoodService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -55,14 +60,31 @@ public class FoodController {
         return ResponseEntity.ok(ApiResponse.success(listFoods));
     }
 
-    //thêm món ăn(dành cho admin)
-//    @PostMapping
-//    @PreAuthorize("hasRole('ADMIN')")
-//    public ResponseEntity<ApiResponse<FoodResponse>> createFood(
-//            @Valid @RequestBody CreateFoodRequest request) {
-//        FoodResponse response = foodUseCase.createFood(request);
-//        return ResponseEntity.status(HttpStatus.CREATED)
-//                .body(ApiResponse.success(response));
-//    }
+
+    //thêm món ăn (ok)
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<FoodResponse>> createFood(
+            @Valid @RequestBody CreateFoodRequest request
+            ){
+        return ResponseEntity.ok(ApiResponse.success(foodService.createFood(request)));
+    }
+
+
+    //cap nhat món ăn
+    @PutMapping("/{id}")
+    @PreAuthorize(("hasRole('ADMIN')"))
+    public ResponseEntity<ApiResponse<FoodResponse>> updateFood(@Valid @RequestBody UpdateFoodRequest request, @PathVariable Long id) {
+        FoodResponse foodResponse = foodService.updateFood(request, id);
+        return ResponseEntity.ok(ApiResponse.success(foodResponse));
+    }
+
+    //xóa món ăn
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<String>> deleteFood(@PathVariable Long id) {
+        foodService.deleteFood(id);
+        return ResponseEntity.ok(ApiResponse.success("Đã xóa thành công"));
+    }
 
 }

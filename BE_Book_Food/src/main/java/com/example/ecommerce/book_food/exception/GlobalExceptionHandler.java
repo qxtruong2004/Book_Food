@@ -1,8 +1,10 @@
 package com.example.ecommerce.book_food.exception;
 
 import com.example.ecommerce.book_food.dto.respone.ApiResponse;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -14,6 +16,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleAllExceptions(Exception ex) {
         return ResponseEntity.ok(ApiResponse.fail("Unexpected error: " + ex.getMessage()));
+    }
+
+    //lỗi 403
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleAccessDenied(AccessDeniedException e) {
+        return ResponseEntity.ok(ApiResponse.fail("You do not have permission to access this resource"));
     }
 
     // Lỗi email đã tồn tại
@@ -94,4 +102,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> handleOrderDoesNotContainFood(OrderDoesNotContainFoodException e) {
         return ResponseEntity.ok(ApiResponse.fail(e.getMessage()));
     }
+
+    // ❌ Lỗi validate Entity hoặc @RequestParam, @PathVariable
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleConstraintViolation(ConstraintViolationException ex) {
+        String errorMessage = ex.getConstraintViolations()
+                .stream()
+                .map(v -> v.getMessage())
+                .findFirst()
+                .orElse("Invalid request");
+
+        return ResponseEntity
+                .ok(ApiResponse.fail(errorMessage));
+    }
+
 }

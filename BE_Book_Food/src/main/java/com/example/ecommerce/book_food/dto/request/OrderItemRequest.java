@@ -17,7 +17,6 @@ public class OrderItemRequest {
 
     @NotNull(message = "Quantity is required")
     @Min(value = 1, message = "Quantity must be at least 1")
-    @Max(value = 10, message = "Quantity cannot exceed 10")
     private Integer quantity;
 
 

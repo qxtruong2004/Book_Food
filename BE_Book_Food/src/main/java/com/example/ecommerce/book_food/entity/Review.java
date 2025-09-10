@@ -47,6 +47,7 @@ public class Review {
     private String comment;
 
     @CreationTimestamp
+    @Builder.Default
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();;
 }

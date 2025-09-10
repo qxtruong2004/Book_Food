@@ -1,20 +1,18 @@
 package com.example.ecommerce.book_food.dto.request;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
 public class CreateReviewRequest {
-    @NotNull
+    @NotNull(message = "FoodID is not Empty")
     private Long foodId;
 
-    @NotNull
-    @Min(1) @Max(5)
+    @NotNull(message = "Rating trong khoảng 0 - 5")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Rating không nhỏ hơn 0")
+    @DecimalMax(value = "5.0", inclusive = true, message = "Rating không lớn hơn 5")
     private BigDecimal rating;
 
     @NotNull

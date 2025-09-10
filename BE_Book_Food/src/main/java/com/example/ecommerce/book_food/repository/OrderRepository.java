@@ -20,9 +20,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = {"orderItems", "orderItems.food", "user"})
     Page<Order> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
+    //Lấy danh sách đơn hàng của cá nhân
+    @EntityGraph(attributePaths = {"orderItems", "orderItems.food", "user"})
+    Page<Order> findByUser_Username(String userName, Pageable pageable);
+
     // Lấy danh sách đơn hàng theo trạng thái với eager loading
     @EntityGraph(attributePaths = {"orderItems", "orderItems.food", "user"})
-    List<Order> findByStatusOrderByCreatedAtDesc(OrderStatus status, Pageable pageable);
+    Page<Order> findByStatusOrderByCreatedAtDesc(OrderStatus status, Pageable pageable);
 
     // Lấy tất cả orders với eager loading
     @EntityGraph(attributePaths = {"orderItems", "orderItems.food", "user"})
@@ -38,8 +42,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     long countByUserId(@Param("userId") Long userId);
 
     // Tính tổng doanh thu theo khoảng thời gian ( chi tính đơn đã hoàn thành)
-    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = 'DELIVERED' AND " +
-            "DATE(o.createdAt) BETWEEN :startDate AND :endDate")
-    BigDecimal getTotalRevenueByDateRange(@Param("startDate") LocalDate startDate,
-                                          @Param("endDate") LocalDate endDate);
+    @Query("SELECT SUM(o.totalAmount) FROM Order o" +
+            " WHERE o.status = com.example.ecommerce.book_food.Enum.OrderStatus.SUCCEEDED " +
+            " AND o.createdAt >= :startDateTime AND o.createdAt <= :endDateTime")
+    BigDecimal getTotalRevenueByDateRange(@Param("startDateTime") LocalDateTime startDateTime,
+                                          @Param("endDateTime") LocalDateTime endDateTime);
+
+    //lấy số đơn hàng của 1 user
+    long countByUser_Username(String username);
 }

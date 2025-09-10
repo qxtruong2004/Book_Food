@@ -17,7 +17,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -87,6 +89,19 @@ public class CategoryService {
     //đếm tổng số category
     public long countCategories(){
         return categoryRepository.countCategories();
+    }
+
+    //tìm kiếm category theo tên
+    public List<CategoryResponse> searchCategory(String keywords){
+        List<Category> listCategories = new ArrayList<>();
+        if(keywords == null && keywords.trim().isEmpty()){
+            throw  new IllegalArgumentException("Keywords cannot be empty");
+        }
+        listCategories = categoryRepository.findByNameContainingIgnoreCase(keywords);
+        if(listCategories.isEmpty()){
+            throw new CategoryNotFoundException("Category not found with keywords: " + keywords);
+        }
+        return categoryMapper.toResponeList(listCategories);
     }
 
 }

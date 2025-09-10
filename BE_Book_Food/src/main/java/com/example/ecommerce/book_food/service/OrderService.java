@@ -22,12 +22,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -92,7 +94,7 @@ public class OrderService {
         return orderMapper.convertToOrderResponse(savedOrder);
     }
 
-    //lay danh sách order của user kèm theo số lượng đơn hàng
+    //lay danh sách order của user kèm theo số lượng đơn hàng (admin)
     public UserOrderResponse getUserOrders(Long userId, int page, int size) {
 
         boolean exists = userRepository.existsById(userId);
@@ -104,7 +106,6 @@ public class OrderService {
 
         // đếm tong so đơn hàng của user
         long totalOrderByUser = orderRepository.countByUserId(userId);
-        //chuyển đổi danh sách đơn hàng thành reponse
         // Chuyển đổi danh sách đơn hàng thành OrderResponse
         List<OrderResponse> orderResponses = orderMapper.convertToOrderResponseList(orders.getContent());
 
@@ -113,7 +114,18 @@ public class OrderService {
                 orderResponses,
                 totalOrderByUser
         );
+    }
 
+    //lay danh sách order của bản thân (user)
+    public UserOrderResponse getMyOrders(String username, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Order> myOrders = orderRepository.findByUser_Username(username, pageable);
+
+        //đếm tổng sl đơn hàng
+        long totalOrders = orderRepository.countByUser_Username(username);
+        List<OrderResponse> orderResponses = orderMapper.convertToOrderResponseList(myOrders.getContent());
+
+        return new UserOrderResponse(orderResponses, totalOrders);
     }
 
     //cập nhật trạng thái order
@@ -137,11 +149,6 @@ public class OrderService {
         return orderMapper.convertToOrderResponse(updatedOrder);
     }
 
-    // Lấy tất cả các đơn hàng
-    public List<OrderResponse> getAllOrders() {
-        List<Order> orders = orderRepository.findAll();
-        return orderMapper.convertToOrderResponseList(orders);
-    }
 
     //tính tổng doanh thu đơn hàng theo thời giann
     public BigDecimal getTotalRevenueByDateRange(LocalDate startDate, LocalDate endDate) {
@@ -152,10 +159,60 @@ public class OrderService {
         if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("Start date must be before end date");
         }
-        BigDecimal totalRevenue = orderRepository.getTotalRevenueByDateRange(startDate, endDate);
+
+        //khi truy vấn khoảng thời gian, muốn tính từ đầu ngày  Ví dụ: 2025-09-01 → 2025-09-01T00:00:00
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+
+        BigDecimal totalRevenue = orderRepository.getTotalRevenueByDateRange(startDateTime, endDateTime);
 
         return totalRevenue != null ? totalRevenue : BigDecimal.ZERO;
     }
 
+    //lấy chi tiet đơn hàng( admin)
+    public OrderResponse getOrderDetailByAdmin(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
+        return orderMapper.convertToOrderResponse(order);
+    }
 
+    //lấy chi tiet đơn hàng (user)
+    public OrderResponse getOrderDetailByUser(Long orderId, String username) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
+        if(!order.getUser().getUsername().equals(username)) {
+            throw new SecurityException("Bạn không có quyền xem chi tiết đơn hàng nguowfi khác");
+        }
+        return orderMapper.convertToOrderResponse(order);
+    }
+
+    //huỷ đơn hàng
+    public void cancelOrder(Long orderId, String username, boolean isAdmin){
+        Order order =  orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
+
+        //nếu không phải admin thì chỉ được phesp hủy của bản thân
+        if(!isAdmin && !order.getUser().getUsername().equals(username)) {
+            throw new UserNotFoundException("Bạn không có quyền huy order này");
+        }
+
+        if(order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalArgumentException("Order cannot be cancelled once it is processed");
+        }
+        order.setStatus(OrderStatus.FAILED);
+        orderRepository.save(order);
+    }
+
+    //lấy danh sách order ( lọc theo trạng thái)
+    public List<OrderResponse> getAllOrders(OrderStatus orderStatus, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Order> orders;
+        if(orderStatus != null) {
+            orders = orderRepository.findByStatusOrderByCreatedAtDesc(orderStatus, pageable);
+        }
+        else{
+            orders = orderRepository.findAll(pageable);
+        }
+        return orderMapper.convertToOrderResponseList(orders.getContent());
+    }
 }

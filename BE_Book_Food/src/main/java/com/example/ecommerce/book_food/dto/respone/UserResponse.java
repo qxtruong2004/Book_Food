@@ -1,5 +1,6 @@
 package com.example.ecommerce.book_food.dto.respone;
 
+import com.example.ecommerce.book_food.Enum.UserRole;
 import com.example.ecommerce.book_food.Enum.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +16,7 @@ public class UserResponse {
     private String username;
     private String fullName;
     private String email;
-    private String role; // ADMIN, CUSTOMER, ...
+    private UserRole role; // ADMIN, CUSTOMER, ...
     private UserStatus status;
 }
 

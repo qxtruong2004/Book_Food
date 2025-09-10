@@ -1,5 +1,6 @@
 package com.example.ecommerce.book_food.config;
 
+import com.example.ecommerce.book_food.Enum.UserRole;
 import com.example.ecommerce.book_food.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -118,8 +119,9 @@ public class JwtTokenProvider {
         return n == null ? null : n.longValue();
     }
 
-    public String getRoleFromToken(String token) {
-        return parseClaims(token).get("role", String.class);
+    public UserRole getRoleFromToken(String token) {
+        String role = parseClaims(token).get("role", String.class);
+        return UserRole.valueOf(role); // convert String -> Enum
     }
 
     public boolean validateToken(String token) {

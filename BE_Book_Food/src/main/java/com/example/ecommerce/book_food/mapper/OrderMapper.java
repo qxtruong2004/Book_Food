@@ -27,8 +27,8 @@ public class OrderMapper {
         this.orderItemMapper = orderItemMapper;
         this.userMapper = userMapper;
     }
-    //ở đây sẽ ánh xạ thủ công, k sd modelmapper để tránh lỗi lazy ở orderitem và user
 
+    //ở đây sẽ ánh xạ thủ công, k sd modelmapper để tránh lỗi lazy ở orderitem và user
     public OrderResponse convertToOrderResponse(Order order) {
         // Chuyển đổi danh sách OrderItem thủ công
         List<OrderItemResponse> itemResponses = order.getOrderItems().stream()
@@ -78,6 +78,8 @@ public class OrderMapper {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
+                .role(user.getRole())
+                .status(user.getStatus())
                 .build();
     }
 }

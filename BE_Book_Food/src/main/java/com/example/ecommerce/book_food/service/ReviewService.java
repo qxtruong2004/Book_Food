@@ -1,6 +1,7 @@
 package com.example.ecommerce.book_food.service;
 
 import com.example.ecommerce.book_food.dto.request.CreateReviewRequest;
+import com.example.ecommerce.book_food.dto.request.UpdateReviewRequest;
 import com.example.ecommerce.book_food.dto.respone.FoodRatingSummaryRespone;
 import com.example.ecommerce.book_food.dto.respone.ReviewResponse;
 import com.example.ecommerce.book_food.entity.Food;
@@ -18,8 +19,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -33,29 +38,34 @@ public class ReviewService {
     private final OrderRepository orderRepository;
 
     //thêm review mới
-    public ReviewResponse addReview(CreateReviewRequest request, Long userId) throws UserNotFoundException, FoodNotFoundException, OrderNotFoundException {
-        //kiểm tra người dùng, food xem có ton tại không
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+    public ReviewResponse addReview(CreateReviewRequest request, String username) throws UserNotFoundException, FoodNotFoundException, OrderNotFoundException {
+        // Lấy user đang login
+       User user = userRepository.findByUsername(username)
+               .orElseThrow(() -> new UserNotFoundException("User not found"));
         Food food = foodRepository.findById(request.getFoodId())
                 .orElseThrow(() -> new FoodNotFoundException("Food not found with id: " + request.getFoodId()));
         // Kiểm tra order
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + request.getOrderId()));
-
+        if(user.getId() != order.getUser().getId()) {
+            throw new UserNotFoundException("Order is not owner you");
+        }
         // Đảm bảo order có món ăn này
         boolean hasFood = order.getOrderItems().stream()
                 .anyMatch(item -> item.getFood().getId().equals(request.getFoodId()));
         if (!hasFood) {
             throw new IllegalArgumentException("This order does not contain the food you want to review");
         }
-
+        if(request.getRating() == null){
+            throw new IllegalArgumentException("Rating cannot be null");
+        }
         Review review = Review.builder()
                 .food(food)
                 .user(user)
                 .order(order)
                 .rating(request.getRating())
                 .comment(request.getComment())
+                .createdAt(LocalDateTime.now())
                 .build();
         Review savedReview = reviewRepository.save(review);
         return reviewMapper.toRespone(savedReview);
@@ -75,22 +85,16 @@ public class ReviewService {
     }
 
     //xóa review
-    public void deleteReview(Long reviewId, Long userId) throws UserNotFoundException, ReviewNotFoundException, ReviewOwnershipException {
-        //kiểm tra người dùng có tồn tại không
-        if(!userRepository.existsById(userId)) {
-            throw new UserNotFoundException("User not found with id: " + userId);
-        }
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ReviewNotFoundException("Review not found with id: " + reviewId));
+    public void deleteReview(Long reviewId, String username) throws UserNotFoundException, ReviewNotFoundException, ReviewOwnershipException {
+        // Lấy review chỉ khi thuộc user login
+        Review review = reviewRepository.findByIdAndUser_Username(reviewId, username)
+                .orElseThrow(() -> new IllegalArgumentException("Review not found or you cannot delete someone else's review"));
 
-        //kiểm tra xem người dùng có là chủ của review không
-        if (!review.getUser().getId().equals(userId)) {
-            throw new ReviewOwnershipException("You are not allowed to delete this review");
-        }
+        // Xóa review
         reviewRepository.deleteById(reviewId);
     }
 
-    //lấy review theo user
+    //lấy review theo user của admin
     public List<ReviewResponse> getReviewsByUser(Long userId, int page, int size) {
         //kiểm tra người dùng
         boolean exists = userRepository.existsById(userId);
@@ -102,6 +106,12 @@ public class ReviewService {
         return reviewMapper.toResponeList(reviewPage.getContent());
     }
 
+    //lấy review của bản thân ( user)
+    public List<ReviewResponse> getMyReviews(String username){
+        List<Review> myReviews = reviewRepository.findByUser_Username(username);
+        return  reviewMapper.toResponeList(myReviews);
+    }
+
 //    //tính trung bình rating theo món ăn
 //    public Double averageRating(Long foodId) throws FoodNotFoundException {
 //        boolean exists = foodRepository.existsById(foodId);
@@ -111,7 +121,6 @@ public class ReviewService {
 //        Double averageRating = reviewRepository.getAverageRatingByFood(foodId);
 //        return averageRating != null ? averageRating : 0.0;
 //    }
-
     public FoodRatingSummaryRespone getFoodRatingSummary(Long foodId) throws FoodNotFoundException {
         boolean exists = foodRepository.existsById(foodId);
         if(!exists){
@@ -123,4 +132,18 @@ public class ReviewService {
         return new FoodRatingSummaryRespone(average, count);
     }
 
+    // cập nhật review
+    public ReviewResponse updateReview(String userName, Long reviewId , UpdateReviewRequest updateReviewRequest){
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewNotFoundException("Review not found with id: " + reviewId));
+
+        //chỉ cho phép user chính chủ update
+        if(!review.getUser().getUsername().equals(userName)){
+            throw new ReviewOwnershipException("You are not allowed to update this review");
+        }
+        review.setRating(updateReviewRequest.getRating());
+        review.setComment(updateReviewRequest.getComment());
+        reviewRepository.save(review);
+        return reviewMapper.toRespone(review);
+    }
 }

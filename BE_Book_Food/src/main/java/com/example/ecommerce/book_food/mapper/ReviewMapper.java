@@ -22,6 +22,7 @@ public class ReviewMapper {
                 .rating(review.getRating())
                 .comment(review.getComment())
                 .username(review.getUser() != null ? review.getUser().getUsername() : null)
+                .createdAt(review.getCreatedAt())
                 .build();
     }
 

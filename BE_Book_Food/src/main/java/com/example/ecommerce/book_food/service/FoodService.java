@@ -1,6 +1,7 @@
 package com.example.ecommerce.book_food.service;
 
 import com.example.ecommerce.book_food.dto.request.CreateFoodRequest;
+import com.example.ecommerce.book_food.dto.request.UpdateFoodRequest;
 import com.example.ecommerce.book_food.dto.respone.FoodResponse;
 import com.example.ecommerce.book_food.entity.Category;
 import com.example.ecommerce.book_food.entity.Food;
@@ -95,4 +96,32 @@ public class FoodService {
         List<Food> foods = foodRepository.findFoodsWithFilters(categoryId, minPrice, maxPrice, pageable);
         return foodMapper.toResponseList(foods);
     }
+
+    // update món ăn
+    public FoodResponse updateFood(UpdateFoodRequest request, Long id) throws FoodNotFoundException {
+        Food food = foodRepository.findById(id)
+                .orElseThrow(() -> new FoodNotFoundException("Food not found with id: " + id));
+        if(request.getName() != null) food.setName(request.getName());
+        if(request.getDescription() != null) food.setDescription(request.getDescription());
+        if(request.getPrice() != null) food.setPrice(request.getPrice());
+        if(request.getImageUrl() != null) food.setImageUrl(request.getImageUrl());
+        if(request.getPreparationTime() != null) food.setPreparationTime(request.getPreparationTime());
+        if(request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + request.getCategoryId()));
+            food.setCategory(category);
+        }
+        if(request.getIsAvailable() != null) food.setIsAvailable(request.getIsAvailable());
+        return foodMapper.toResponse(foodRepository.save(food));
+
+    }
+
+    //xóa món ăn
+    public void deleteFood(Long id) throws FoodNotFoundException {
+        if(!foodRepository.existsById(id)) {
+            throw new FoodNotFoundException("Food not found with id: " + id);
+        }
+        foodRepository.deleteById(id);
+    }
+
 }

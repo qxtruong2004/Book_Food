@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
@@ -15,8 +16,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> findByFoodIdOrderByCreatedAtDesc(Long foodId, Pageable pageable);
 
 
-    // Lấy review của user
+    // Lấy review của user(admin)
     Page<Review> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+
+    //lấy review của bản thân
+    List<Review> findByUser_Username(String username);
 
     // Tính trung bình rating của 1 món ăn
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.food.id = :foodId")
@@ -24,4 +28,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // Đếm số review của một món ăn
     long countByFoodId(Long foodId);
+
+    //trả về review chỉ khi review thuộc user đang login.
+    Optional<Review> findByIdAndUser_Username(Long reviewId, String username);
 }

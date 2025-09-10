@@ -32,7 +32,7 @@ public class OrderItem {
 
     @Column(nullable = false)
     @NotNull(message = "Quantity cannot be null")
-    @Positive(message = "Quantity must be positive")
+    @Positive(message = "Quantity must be positive") //ngăn số âm và 0
     private Integer quantity;
 
     @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
