@@ -1,5 +1,8 @@
 export type UserRole = "USER" | "ADMIN";
-export type UserStatus = "ACTIVE" | "BLOCKED"
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  BLOCKED = 'BLOCKED',
+}
 
 export interface UserResponse{
     id: number;

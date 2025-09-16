@@ -19,7 +19,13 @@ export interface CreateReviewRequest{
     comment?: string;
 }
 
-export interface UpdateReivewRequest{
+export interface UpdateReviewRequest{
     comment: string;
     rating: number;
+}
+
+export interface FoodRatingSummaryResponse {
+  averageRating: number;
+  totalReviews: number;
+  // ... các field bạn định nghĩa trong FoodRatingSummaryRespone
 }

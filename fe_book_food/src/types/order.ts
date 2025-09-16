@@ -1,6 +1,11 @@
 import { UserResponse } from "./user";
 
-export type OrderStatus = "PENDING" | "SUCCEEDED" | "FAILED" | "PREPARING";
+export enum OrderStatus{
+  PENDING = 'PENDING',
+  SUCCEEDED = 'SUCCEEDED',
+  FAILED = 'FAILED',
+  PREPARING = 'PREPARING',
+}
 export interface OrderItemResponse{
     foodId: number;
     foodName: string;
