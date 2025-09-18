@@ -1,0 +1,236 @@
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { foodService } from "../services/foodService";
+import {
+    FoodResponse,
+    CreateFoodRequest,
+    UpdateFoodRequest,
+    FoodSearchParams,
+} from "../types/food";
+
+interface FoodState {
+    foods: FoodResponse[];
+    categoryFoods: FoodResponse[];
+    searchResults: FoodResponse[];
+    currentFood: FoodResponse | null;
+    loading: boolean;
+    error: string | null;
+    createLoading: boolean;
+    updateLoading: boolean;
+    deleteLoading: boolean;
+}
+
+const initialState: FoodState = {
+    foods: [],
+    categoryFoods: [],
+    searchResults: [],
+    currentFood: null,
+    loading: false,
+    error: null,
+    createLoading: false,
+    updateLoading: false,
+    deleteLoading: false,
+};
+
+// --- Async thunks ---
+
+// Lấy tất cả món ăn
+export const fetchAllFoodsAsync = createAsyncThunk(
+    "food/fetchAllFoods",
+    async ({ page = 0, size = 10 }: { page?: number; size?: number }, { rejectWithValue }) => {
+        try {
+            const foods = await foodService.getAllFoods(page, size);
+            if (!foods) throw new Error("No foods found");
+            return foods;
+        } catch (error: any) {
+            return rejectWithValue(error.message || "Failed to fetch foods");
+        }
+    }
+);
+
+// Lấy món ăn theo category
+export const fetchFoodsByCategoryAsync = createAsyncThunk(
+    "food/fetchFoodsByCategory",
+    async (
+        { categoryId, page = 0, size = 10 }: { categoryId: number; page?: number; size?: number },
+        { rejectWithValue }
+    ) => {
+        try {
+            const foods = await foodService.getFoodsByCategory(categoryId, page, size);
+            if (!foods) throw new Error("No foods found for category");
+            return foods;
+        } catch (error: any) {
+            return rejectWithValue(error.message || "Failed to fetch foods by category");
+        }
+    }
+);
+
+// Lấy món ăn theo id
+export const fetchFoodByIdAsync = createAsyncThunk(
+    "food/fetchFoodById",
+    async (id: number, { rejectWithValue }) => {
+        try {
+            const food = await foodService.getFoodById(id);
+            if (!food) throw new Error("Food not found");
+            return food;
+        } catch (error: any) {
+            return rejectWithValue(error.message || "Failed to fetch food");
+        }
+    }
+);
+
+// Tìm kiếm món ăn
+export const searchFoodsAsync = createAsyncThunk(
+    "food/searchFoods",
+    async (params: FoodSearchParams, { rejectWithValue }) => {
+        try {
+            const results = await foodService.searchFoods(params);
+            if (!results) throw new Error("No search results");
+            return results;
+        } catch (error: any) {
+            return rejectWithValue(error.message || "Failed to search foods");
+        }
+    }
+);
+
+// Thêm món ăn
+export const createFoodAsync = createAsyncThunk(
+    "food/createFood",
+    async (request: CreateFoodRequest, { rejectWithValue }) => {
+        try {
+            const food = await foodService.createFood(request);
+            if (!food) throw new Error("Failed to create food");
+            return food;
+        } catch (error: any) {
+            return rejectWithValue(error.message || "Failed to create food");
+        }
+    }
+);
+
+// Cập nhật món ăn
+export const updateFoodAsync = createAsyncThunk(
+    "food/updateFood",
+    async ({ id, request }: { id: number; request: UpdateFoodRequest }, { rejectWithValue }) => {
+        try {
+            const food = await foodService.updateFood(id, request);
+            if (!food) throw new Error("Failed to update food");
+            return food;
+        } catch (error: any) {
+            return rejectWithValue(error.message || "Failed to update food");
+        }
+    }
+);
+
+// Xóa món ăn
+export const deleteFoodAsync = createAsyncThunk(
+    "food/deleteFood",
+    async (id: number, { rejectWithValue }) => {
+        try {
+            const result = await foodService.deleteFood(id);
+            if (!result) throw new Error("Failed to delete food");
+            return id;
+        } catch (error: any) {
+            return rejectWithValue(error.message || "Failed to delete food");
+        }
+    }
+);
+
+// --- Slice ---
+const foodSlice = createSlice({
+    name: "food",
+    initialState,
+    reducers: {
+        clearError: (state) => {
+            state.error = null;
+        },
+        clearCurrentFood: (state) => {
+            state.currentFood = null;
+        },
+        clearSearchResults: (state) => {
+            state.searchResults = [];
+        },
+    },
+    extraReducers: (builder) => {
+        // Fetch all foods
+        builder
+            .addCase(fetchAllFoodsAsync.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchAllFoodsAsync.fulfilled, (state, action) => {
+                state.loading = false;
+                state.foods = action.payload;
+            })
+            .addCase(fetchAllFoodsAsync.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            });
+
+        // Fetch foods by category
+        builder.addCase(fetchFoodsByCategoryAsync.fulfilled, (state, action) => {
+            state.categoryFoods = action.payload;
+        });
+
+        // Fetch food by id
+        builder.addCase(fetchFoodByIdAsync.fulfilled, (state, action) => {
+            state.currentFood = action.payload;
+        });
+
+        // Search foods
+        builder.addCase(searchFoodsAsync.fulfilled, (state, action) => {
+            state.searchResults = action.payload;
+        });
+
+        // Create food
+        builder
+            .addCase(createFoodAsync.pending, (state) => {
+                state.createLoading = true;
+            })
+            .addCase(createFoodAsync.fulfilled, (state, action) => {
+                state.createLoading = false;
+                state.foods.unshift(action.payload);
+            })
+            .addCase(createFoodAsync.rejected, (state, action) => {
+                state.createLoading = false;
+                state.error = action.payload as string;
+            });
+
+        // Update food
+        builder
+            .addCase(updateFoodAsync.pending, (state) => {
+                state.updateLoading = true;
+            })
+            .addCase(updateFoodAsync.fulfilled, (state, action) => {
+                state.updateLoading = false;
+                const idx = state.foods.findIndex((f) => f.id === action.payload.id);
+                if (idx !== -1) state.foods[idx] = action.payload;
+                if (state.currentFood?.id === action.payload.id) {
+                    state.currentFood = action.payload;
+                }
+            })
+            .addCase(updateFoodAsync.rejected, (state, action) => {
+                state.updateLoading = false;
+                state.error = action.payload as string;
+            });
+
+        // Delete food
+        builder
+            .addCase(deleteFoodAsync.pending, (state) => {
+                state.deleteLoading = true;
+            })
+            .addCase(deleteFoodAsync.fulfilled, (state, action) => {
+                state.deleteLoading = false;
+                state.foods = state.foods.filter((f) => f.id !== action.payload);
+                state.categoryFoods = state.categoryFoods.filter((f) => f.id !== action.payload);
+                if (state.currentFood?.id === action.payload) {
+                    state.currentFood = null;
+                }
+            })
+            .addCase(deleteFoodAsync.rejected, (state, action) => {
+                state.deleteLoading = false;
+                state.error = action.payload as string;
+            });
+    },
+});
+
+export const { clearError, clearCurrentFood, clearSearchResults } = foodSlice.actions;
+export default foodSlice.reducer;

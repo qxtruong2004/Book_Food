@@ -1,13 +1,13 @@
-import { AuthResponse } from "../types/auth";
+import { AuthResponse, UserLoginRequest, UserRegisterRequest } from "../types/auth";
 import { UserResponse } from "../types/user";
 import { API_BASE_URL, API_ENDPOINTS, REFRESH_TOKEN_KEY, TOKEN_KEY } from "../utils/constants";
 import { api, ApiResponse } from "./api";
 
 export const authService = {
     //login
-    async login(username: string, password: string): Promise<AuthResponse>{
+    async login(credentials: UserLoginRequest): Promise<AuthResponse>{
         const response = await  api.post<ApiResponse<AuthResponse>>(API_ENDPOINTS.AUTH.LOGIN, {
-            username, password
+            credentials
         });
         const {accessToken, refreshToken} = response.data.data;
         
@@ -18,9 +18,9 @@ export const authService = {
     },
 
     //register
-    async register( fullName: string, username: string, email: string, password: string): Promise<AuthResponse>{
+    async register(credentials: UserRegisterRequest): Promise<AuthResponse>{
         const response = await api.post<ApiResponse<AuthResponse>>(API_ENDPOINTS.AUTH.REGISTER, {
-            fullName, username, email, password
+            credentials
         });
         return response.data.data;
     },
