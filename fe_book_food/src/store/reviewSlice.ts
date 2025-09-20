@@ -85,10 +85,10 @@ export const createReviewAsync = createAsyncThunk(
 
 export const updateReviewAsync = createAsyncThunk(
     'review/updateReview',
-    async (params: {reviewId: number, updateReiview: UpdateReviewRequest}, { rejectWithValue }) => {
+    async (params: {reviewId: number, updateReview: UpdateReviewRequest}, { rejectWithValue }) => {
         try {
-            const{reviewId, updateReiview} = params;
-            const review = await reviewService.updateReview(reviewId, updateReiview);
+            const{reviewId, updateReview} = params;
+            const review = await reviewService.updateReview(reviewId, updateReview);
             return review;
         } catch (error: any) {
             return rejectWithValue(error.message || 'Failed to update review');
