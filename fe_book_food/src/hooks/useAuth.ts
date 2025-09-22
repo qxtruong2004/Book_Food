@@ -25,7 +25,7 @@ export const useAuth = () => {
         ném lỗi lên component khi thất bại để component có thể xử lý tiếp.
     */
     const login = useCallback(
-        async (credentials: UserLoginRequest, redirectPath = "/") => {
+        async (credentials: UserLoginRequest, redirectPath = "/reviews") => {
             try {
                 //trả về một thunk action (promise).
                 /*
@@ -36,6 +36,7 @@ export const useAuth = () => {
                 */
                 const result = await dispatch(loginAsync(credentials)).unwrap();
                 toast.success("Login successful");
+                console.log("Redirecting to:", redirectPath);
                 //Điều hướng người dùng sang trang mong muốn sau khi login thành công
                 navigate(redirectPath);
                 return result;
@@ -50,15 +51,12 @@ export const useAuth = () => {
 
     //register
     const register = useCallback(
-        async (userData: UserRegisterRequest, redirectPath = "/") => {
+        async (userData: UserRegisterRequest, redirectPath = "/login") => {
             try {
                 const result = await dispatch(registerAsync(userData)).unwrap();
-                toast.success("Registration successful!");
                 navigate(redirectPath);
                 return result;
             } catch (err: any) {
-                const msg = typeof err === "string" ? err : err?.message || "Registration failed";
-                toast.error(msg);
                 throw err;
             }
         },

@@ -1,4 +1,4 @@
-import { Category, CategoryResponse } from "./category";
+import { CategoryResponse } from "./category";
 export interface Food{
     id: number;
     name: string;
@@ -8,7 +8,7 @@ export interface Food{
     isAvailable: boolean;
     prepartationTime: number;
     rating: number;
-    category: Category;
+    category: CategoryResponse;
     createdAt: string;
     updatedAt: string;
 }

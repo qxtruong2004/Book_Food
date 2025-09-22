@@ -6,9 +6,9 @@ import { api, ApiResponse } from "./api";
 export const authService = {
     //login
     async login(credentials: UserLoginRequest): Promise<AuthResponse>{
-        const response = await  api.post<ApiResponse<AuthResponse>>(API_ENDPOINTS.AUTH.LOGIN, {
+        const response = await  api.post<ApiResponse<AuthResponse>>(API_ENDPOINTS.AUTH.LOGIN, 
             credentials
-        });
+        );
         const {accessToken, refreshToken} = response.data.data;
         
         //lưu token
@@ -18,11 +18,11 @@ export const authService = {
     },
 
     //register
-    async register(credentials: UserRegisterRequest): Promise<AuthResponse>{
-        const response = await api.post<ApiResponse<AuthResponse>>(API_ENDPOINTS.AUTH.REGISTER, {
+    async register(credentials: UserRegisterRequest){
+        const response = await api.post<ApiResponse<AuthResponse>>(API_ENDPOINTS.AUTH.REGISTER,
             credentials
-        });
-        return response.data.data;
+        );
+        return response.data;// { success, message, data }
     },
  
     //logout

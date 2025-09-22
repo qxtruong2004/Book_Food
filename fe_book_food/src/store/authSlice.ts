@@ -60,12 +60,18 @@ export const registerAsync = createAsyncThunk('auth/register',
     async (credentials: UserRegisterRequest, { rejectWithValue }) => {
         try {
             const response = await authService.register(credentials);
-            localStorage.setItem(TOKEN_KEY, response.accessToken);
-            localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
-            return response;
+            // Nếu backend báo lỗi
+            if (!response.success || !response.data) {
+                return rejectWithValue(response.message);
+            }
+            localStorage.setItem(TOKEN_KEY, response.data.accessToken);
+            localStorage.setItem(REFRESH_TOKEN_KEY, response.data.refreshToken);
+            return response.data;
         }
         catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || 'Login failed');
+            return rejectWithValue(
+                error.response?.data?.message || error.message || "Registration failed"
+            );
         }
     }
 )
@@ -198,7 +204,7 @@ const authSlice = createSlice({
             })
             .addCase(registerAsync.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload as string;
+                state.error = action.payload as string; //message báo lỗi backend
             });
 
         //get current user
