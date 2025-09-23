@@ -49,7 +49,9 @@ export const useFood = () => {
   const fetchFoodsByCategory = useCallback(
     async (categoryId: number, page = 0, size = 10) => {
       try {
-        return await dispatch(fetchFoodsByCategoryAsync({ categoryId, page, size })).unwrap();
+        const result = await dispatch(fetchFoodsByCategoryAsync({ categoryId, page, size })).unwrap();
+        console.log("Foods fetched:", result);
+
       } catch (err: any) {
         toast.error(err || "Failed to fetch foods by category");
         throw err;
@@ -72,17 +74,15 @@ export const useFood = () => {
   );
 
   // Tìm kiếm món ăn
-  const searchFoods = useCallback(
-    async (params: FoodSearchParams) => {
-      try {
-        return await dispatch(searchFoodsAsync(params)).unwrap();
-      } catch (err: any) {
-        toast.error(err || "Failed to search foods");
-        throw err;
-      }
-    },
-    [dispatch]
-  );
+  const searchFoods = useCallback(async (params: FoodSearchParams) => {
+    try {
+      return await dispatch(searchFoodsAsync(params)).unwrap(); // sẽ là [] nếu rỗng
+    } catch (err: any) {
+      toast.error(err || "Failed to search foods");
+      return [];
+    }
+  }, [dispatch]);
+
 
   // Tạo món ăn
   const createFood = useCallback(

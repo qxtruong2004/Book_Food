@@ -9,44 +9,42 @@ import Footer from './components/common/Footer';
 import { Route, Routes } from 'react-router-dom';
 
 import RegisterPage from './pages/RegisterPage';
-import FoodTestPage from './pages/FoodTestPage';
-import FoodListTestPage from './pages/FoodListTestPage';
-import FoodDetailsTestPage from './pages/FoodDetailsTestPage ';
 import FoodPage from './pages/FoodPage';
 import OrdersTestPage from './pages/OrdersTestPage';
 import ReviewsTestPage from './pages/ReviewsTestPage';
-import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import { ToastContainer } from 'react-toastify';
+import MainLayout from './layouts/MainLayout';
+import AuthLayout from './layouts/AuthLayout';
+import CategoryPage from './pages/CategoryPage';
+import { ROUTE_PATTERNS, ROUTES } from './utils/constants';
+import FoodDetailsPage from './pages/FoodDetailsPage ';
 const BuggyComponent = () => {
   throw new Error("Lỗi test!");
 };
 
 function App() {
   return (
-    <div className="d-flex flex-column min-vh-100">
-      {/* Header */}
-      <Header />
+    <>
+      <Routes>
+        {/* Layout chính */}
+        <Route element={<MainLayout />}>
+          <Route path={ROUTES.HOME} element={<FoodPage />} />
+          <Route path={ROUTES.CATEGORY} element={<CategoryPage />} />
+          <Route path={ROUTE_PATTERNS.FOOD_DETAIL} element={<FoodDetailsPage />} />
+          <Route path="/reviews" element={<ReviewsTestPage />} />
+        </Route>
 
-      {/* Nội dung chính */}
-      <main className="flex-grow-1">
-        <Routes>
-          <Route path="/category" element={<HomePage />} />
-          <Route path="/cart" element={<OrdersTestPage />} />
-          
+        {/* Layout cho login/register */}
+        <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/reviews" element={<ReviewsTestPage />} />
+        </Route>
+      </Routes>
 
-          {/* Admin pages (sau này) */}
-          {/* <Route path="/admin/dashboard" element={<AdminDashboard />} /> */}
-        </Routes>
-      </main>
-
-      {/* Footer */}
-      <Footer />
-      <ToastContainer />
-    </div>
+      {/* Toast đặt ngoài cùng để toàn app đều gọi được */}
+      <ToastContainer position="top-right" autoClose={3000} />
+    </>
   );
 }
 

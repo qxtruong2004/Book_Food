@@ -89,8 +89,14 @@ export const API_ENDPOINTS = {
 export const ROUTES = {
     // Public
     HOME: "/",
-    MENU: "/menu",
+    CATEGORY: "/category",
+
+    FOODS: "/foods",
+    foodDetail: (id: number | string) => `/foods/${id}`,
+
     CART: "/cart",
+
+
     LOGIN: "/login",
     REGISTER: "/register",
 
@@ -106,6 +112,11 @@ export const ROUTES = {
         USERS: "/admin/users",
     },
 };
+
+export const ROUTE_PATTERNS = {
+  FOOD_DETAIL: "/foods/:id",
+};
+
 
 // Others
 export const DEFAULT_PAGE_SIZE = 10;

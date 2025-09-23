@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import Loading from "../common/Loading";
 import { toast } from "react-toastify";
-
+import { Link } from "react-router-dom";
+import "../../App.css"
 const LoginForm: React.FC = () => {
     const { login, loading } = useAuth(); // lấy login từ useAuth
     const [username, setUsername] = useState("");
@@ -69,6 +70,9 @@ const LoginForm: React.FC = () => {
                 )}
                 {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
+            <div className="text-center" style={{paddingTop: "10px"}}>
+                <Link to="/register">Bạn chưa có tài khoản? Đăng kí tại đây.</Link>
+            </div>
         </form>
     );
 };

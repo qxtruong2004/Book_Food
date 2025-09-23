@@ -10,9 +10,10 @@ interface Category {
 interface CategoryListProps {
   categories: Category[];
   onSelectCategory?: (id: number) => void;
+  selectedCategory?: number | null; // 👈 thêm dòng này
 }
 
-const CategoryList: React.FC<CategoryListProps> = ({ categories, onSelectCategory }) => {
+const CategoryList: React.FC<CategoryListProps> = ({ categories, onSelectCategory, selectedCategory }) => {
   return (
     <div className="row">
       {categories.map((cat) => (
@@ -20,6 +21,7 @@ const CategoryList: React.FC<CategoryListProps> = ({ categories, onSelectCategor
           <CategoryCard
             name={cat.name}
             onClick={() => onSelectCategory && onSelectCategory(cat.id)}
+            isSelected={selectedCategory === cat.id} // 👈 check xem có trùng không
           />
         </div>
       ))}

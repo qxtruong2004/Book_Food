@@ -69,12 +69,12 @@ export const useAuth = () => {
             // unwrap() sẽ throw nếu logoutAsync bị rejected
             await dispatch(logoutAsync()).unwrap();
             toast.success("Logged out successfully");
-            navigate("/login");
+            navigate("/");
         } catch (err: any) {
             console.error("Logout error:", err);
             // đảm bảo xóa credential & giỏ hàng dù server logout có lỗi
             dispatch(clearCredentials());
-            navigate("/login");
+            navigate("/");
             // không rethrow (thường UI không cần xử lý thêm khi logout thất bại)
         }
     }, [dispatch, navigate]);

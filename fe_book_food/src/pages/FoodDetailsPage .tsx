@@ -1,0 +1,36 @@
+import { useParams } from "react-router-dom";
+import FoodDetails from "../components/food/FoodDetails";
+import { useFood } from "../hooks/useFood";
+import { useEffect } from "react";
+
+const FoodDetailsPage = () => {
+  const { id } = useParams<{ id: string }>(); // lấy id từ URL
+  const { currentFood, fetchFoodById, loading, error } = useFood();
+
+  useEffect(() => {
+    if (id) {
+      fetchFoodById(Number(id)); //gọi API lấy món ăn theo id
+    }
+  }, [id, fetchFoodById]);
+  if (loading) return <p>Đang tải chi tiết món ăn...</p>;
+  if (error) return <p className="text-danger">{error}</p>;
+  if (!currentFood) return <p className="text-muted">Không tìm thấy món ăn.</p>;
+
+  return (
+    <div className="container mt-4">
+      <FoodDetails
+        id={currentFood.id}
+        name={currentFood.name}
+        description={currentFood.description}
+        price={currentFood.price}
+        imageUrl={currentFood.imageUrl}
+        isAvailable={currentFood.isAvailable}
+        preparationTime={currentFood.preparationTime}
+        rating={currentFood.rating}
+        categoryName={currentFood.category?.name || "Không có"}
+      />
+    </div>
+  );
+};
+
+export default FoodDetailsPage;

@@ -4,12 +4,14 @@ import React from "react";
 interface CategoryCardProps {
   name: string;
   onClick?: () => void;
+  isSelected?: boolean; // 👈 thêm vào
 }
 
-const CategoryCard: React.FC<CategoryCardProps> = ({ name, onClick }) => {
+const CategoryCard: React.FC<CategoryCardProps> = ({ name, onClick, isSelected }) => {
   return (
     <div
-      className="p-3 border rounded text-center bg-light shadow-sm"
+    className={`p-3 border rounded text-center shadow-sm ${isSelected ? "bg-primary text-white" : "bg-light"}`}
+
       style={{ cursor: onClick ? "pointer" : "default" }}
       onClick={onClick}
     >

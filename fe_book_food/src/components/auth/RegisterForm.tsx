@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 import { isEmailValid } from "../../utils/helpers";
+import { Link } from "react-router-dom";
 
 const RegisterForm: React.FC = () => {
     const { register, loading } = useAuth();
@@ -110,6 +111,10 @@ const RegisterForm: React.FC = () => {
             <button type="submit" className="btn btn-success w-100">
                 Đăng ký
             </button>
+
+            <div className="text-center" style={{paddingTop: "10px"}}>
+                <Link to="/login">Bạn đã có tài khoản? Đăng nhập tại đây.</Link>
+            </div>
         </form>
     );
 };

@@ -1,16 +1,10 @@
 import { CategoryResponse } from "./category";
+//phần dùng cho backend
 export interface Food{
     id: number;
-    name: string;
-    description: string;
-    price: number;
-    imageUrl: string;
-    isAvailable: boolean;
-    prepartationTime: number;
-    rating: number;
-    category: CategoryResponse;
-    createdAt: string;
-    updatedAt: string;
+  name: string;
+  price: number;
+  image: string;
 }
 
 export interface CreateFoodRequest{

@@ -5,11 +5,12 @@ import {
     CreateFoodRequest,
     UpdateFoodRequest,
     FoodSearchParams,
+    Food,
 } from "../types/food";
 
 interface FoodState {
-    foods: FoodResponse[];
-    categoryFoods: FoodResponse[];
+    foods: Food[];
+    categoryFoods: Food[];
     searchResults: FoodResponse[];
     currentFood: FoodResponse | null;
     loading: boolean;
@@ -55,9 +56,9 @@ export const fetchFoodsByCategoryAsync = createAsyncThunk(
         { rejectWithValue }
     ) => {
         try {
-            const foods = await foodService.getFoodsByCategory(categoryId, page, size);
-            if (!foods) throw new Error("No foods found for category");
-            return foods;
+            const categoryFoods = await foodService.getFoodsByCategory(categoryId, page, size);
+            if (!categoryFoods) throw new Error("No foods found for category");
+            return categoryFoods;
         } catch (error: any) {
             return rejectWithValue(error.message || "Failed to fetch foods by category");
         }
@@ -79,18 +80,23 @@ export const fetchFoodByIdAsync = createAsyncThunk(
 );
 
 // Tìm kiếm món ăn
-export const searchFoodsAsync = createAsyncThunk(
+export const searchFoodsAsync = createAsyncThunk<
+    FoodResponse[],                // payload type khi fulfilled
+    FoodSearchParams,              // tham số đầu vào
+    { rejectValue: string }        // type khi reject
+>(
     "food/searchFoods",
-    async (params: FoodSearchParams, { rejectWithValue }) => {
+    async (params, { rejectWithValue }) => {
         try {
             const results = await foodService.searchFoods(params);
-            if (!results) throw new Error("No search results");
-            return results;
+            // ✅ coi null/undefined là không có kết quả -> mảng rỗng
+            return results ?? [];
         } catch (error: any) {
-            return rejectWithValue(error.message || "Failed to search foods");
+            return rejectWithValue(error?.message || "Failed to search foods");
         }
     }
 );
+
 
 // Thêm món ăn
 export const createFoodAsync = createAsyncThunk(
@@ -158,7 +164,7 @@ const foodSlice = createSlice({
             })
             .addCase(fetchAllFoodsAsync.fulfilled, (state, action) => {
                 state.loading = false;
-                state.foods = action.payload;
+                state.foods = action.payload || [];
             })
             .addCase(fetchAllFoodsAsync.rejected, (state, action) => {
                 state.loading = false;
@@ -175,10 +181,21 @@ const foodSlice = createSlice({
             state.currentFood = action.payload;
         });
 
-        // Search foods
-        builder.addCase(searchFoodsAsync.fulfilled, (state, action) => {
-            state.searchResults = action.payload;
-        });
+        //search food
+        builder
+            .addCase(searchFoodsAsync.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(searchFoodsAsync.fulfilled, (state, action) => {
+                state.loading = false;
+                state.searchResults = action.payload; // có thể là []
+            })
+            .addCase(searchFoodsAsync.rejected, (state, action) => {
+                state.loading = false;
+                state.error = (action.payload as string) ?? "Failed to search foods";
+            });
+
 
         // Create food
         builder
@@ -201,8 +218,18 @@ const foodSlice = createSlice({
             })
             .addCase(updateFoodAsync.fulfilled, (state, action) => {
                 state.updateLoading = false;
+
+                // Map sang Food để update list
+                const updated: Food = {
+                    id: action.payload.id,
+                    name: action.payload.name,
+                    price: action.payload.price,
+                    image: action.payload.imageUrl,
+                };
+
                 const idx = state.foods.findIndex((f) => f.id === action.payload.id);
-                if (idx !== -1) state.foods[idx] = action.payload;
+                if (idx !== -1) state.foods[idx] = updated;
+                // Update currentFood đầy đủ (FoodResponse)
                 if (state.currentFood?.id === action.payload.id) {
                     state.currentFood = action.payload;
                 }
