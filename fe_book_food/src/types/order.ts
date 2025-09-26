@@ -50,3 +50,10 @@ export interface UpdateOrderStatusRequest {
   orderId: number;
   status: OrderStatus; 
 }
+//giỏ hàng tạm thời
+export type DraftItem = {
+  foodId: number;
+  quantity: number;
+  foodName?: string;
+  price?: number;       // optional, nếu lúc thêm vào có sẵn giá
+};

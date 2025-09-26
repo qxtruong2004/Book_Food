@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { useCallback } from "react"
 import { UserLoginRequest, UserRegisterRequest } from "../types/auth"
 import { clearCredentials, clearError, getCurrentUserAsync, loginAsync, logoutAsync, refreshTokenAsync, registerAsync } from "../store/authSlice"
+import { ROUTES } from "../utils/constants";
 
 export const useAuth = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -25,7 +26,7 @@ export const useAuth = () => {
         ném lỗi lên component khi thất bại để component có thể xử lý tiếp.
     */
     const login = useCallback(
-        async (credentials: UserLoginRequest, redirectPath = "/reviews") => {
+        async (credentials: UserLoginRequest, redirectPath = ROUTES.HOME) => {
             try {
                 //trả về một thunk action (promise).
                 /*
@@ -69,12 +70,12 @@ export const useAuth = () => {
             // unwrap() sẽ throw nếu logoutAsync bị rejected
             await dispatch(logoutAsync()).unwrap();
             toast.success("Logged out successfully");
-            navigate("/");
+            navigate(ROUTES.HOME);
         } catch (err: any) {
             console.error("Logout error:", err);
             // đảm bảo xóa credential & giỏ hàng dù server logout có lỗi
             dispatch(clearCredentials());
-            navigate("/");
+            navigate(ROUTES.HOME);
             // không rethrow (thường UI không cần xử lý thêm khi logout thất bại)
         }
     }, [dispatch, navigate]);

@@ -5,7 +5,9 @@ import Loading from "../common/Loading";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import "../../App.css"
-const LoginForm: React.FC = () => {
+
+type Props = { redirectTo?: string };
+const LoginForm: React.FC<Props> = ({redirectTo = "/"}) => {
     const { login, loading } = useAuth(); // lấy login từ useAuth
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -16,7 +18,7 @@ const LoginForm: React.FC = () => {
         setError(null); // reset error trước khi login
         try {
             // Gọi login từ useAuth
-            await login({ username, password }, "/");
+            await login({ username, password }, redirectTo);
             toast.success("🎉 Đăng nhập thành công!", {
                 position: "top-center",
                 autoClose: 2000, // tự tắt sau 2 giây

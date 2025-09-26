@@ -1,8 +1,10 @@
 // src/components/food/FoodDetails.tsx
 import React from "react";
+import AddToDraftButton from "./AddToDraftButton";
+
 
 interface FoodDetailsProps {
-    id: number;
+  id: number;
   name: string;
   description: string;
   price: number;
@@ -12,7 +14,9 @@ interface FoodDetailsProps {
   rating: number;
   categoryName: string;
 }
-const FoodDetails: React.FC<FoodDetailsProps> = ({ name, description, price, imageUrl,isAvailable ,preparationTime, rating, categoryName  }) => {
+const FoodDetails: React.FC<FoodDetailsProps> = ({
+  id, name, description, price, imageUrl, isAvailable, preparationTime, rating, categoryName
+}) => {
   return (
     <div className="card shadow p-4">
       <img
@@ -24,27 +28,26 @@ const FoodDetails: React.FC<FoodDetailsProps> = ({ name, description, price, ima
       <h2>{name}</h2>
       <p className="text-muted">{description}</p>
       <h4 className="text-danger fw-bold">{price.toLocaleString()} đ</h4>
-       {/* Thông tin bổ sung */}
+
       <ul className="list-unstyled mt-3">
-        <li>
-          <strong>Danh mục:</strong> {categoryName}
-        </li>
-        <li>
-          <strong>Thời gian chế biến:</strong> {preparationTime} phút
-        </li>
+        <li><strong>Danh mục:</strong> {categoryName}</li>
+        <li><strong>Thời gian chế biến:</strong> {preparationTime} phút</li>
         <li>
           <strong>Tình trạng:</strong>{" "}
-          {isAvailable ? (
-            <span className="text-success">Còn hàng</span>
-          ) : (
-            <span className="text-danger">Hết hàng</span>
-          )}
+          {isAvailable ? <span className="text-success">Còn hàng</span> : <span className="text-danger">Hết hàng</span>}
         </li>
-        <li>
-          <strong>Đánh giá:</strong> ⭐ {rating.toFixed(1)}/5
-        </li>
+        <li><strong>Đánh giá:</strong> ⭐ {rating.toFixed(1)}/5</li>
       </ul>
-      <button className="btn btn-success mt-3">Thêm vào giỏ</button>
+
+      {/* ✅ Nút thêm vào đơn */}
+      {isAvailable ? (
+         <div className="mt-3">
+          {/* ✅ Truyền tên và giá để lưu vào draft */}
+          <AddToDraftButton foodId={id} foodName={name} price={price} />
+        </div>
+      ) : (
+        <button className="btn btn-secondary mt-3" disabled>Hết hàng</button>
+      )}
     </div>
   );
 };
