@@ -6,12 +6,20 @@ export enum OrderStatus{
   FAILED = 'FAILED',
   PREPARING = 'PREPARING',
 }
+
+export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
+  PENDING: "Chờ xử lý",
+  PREPARING: "Đang xử lý",
+  SUCCEEDED: "Hoàn tất",
+  FAILED: "Đã hủy",
+};
 export interface OrderItemResponse{
     foodId: number;
     foodName: string;
     quantity: number;
     price: number;       
     totalPrice: number;
+    reviewed: boolean;
 }
 
 export interface OrderResponse {

@@ -95,7 +95,7 @@ export const ROUTES = {
     foodDetail: (id: number | string) => `/foods/${id}`,
 
     CHECKOUT: "/checkout",
-
+    REVIEW: "/my_reviews",
 
     LOGIN: "/login",
     REGISTER: "/register",

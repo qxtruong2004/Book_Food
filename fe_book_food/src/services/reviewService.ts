@@ -1,4 +1,3 @@
-import { ca } from "zod/v4/locales";
 import { CreateReviewRequest, FoodRatingSummaryResponse, Review, UpdateReviewRequest } from "../types/review";
 import { API_ENDPOINTS, TOKEN_KEY } from "../utils/constants"
 import { api, ApiResponse } from "./api";
@@ -26,7 +25,7 @@ export const reviewService = {
         try {
             const response = await api.delete<ApiResponse<void>>(`${API_ENDPOINTS.REVIEWS.DELETE}/${reviewId}`);
         } catch (error) {
-            console.error("Create review error: ", error);
+            console.error("Delete review error: ", error);
         }
     },
 
@@ -34,7 +33,7 @@ export const reviewService = {
     async getReviewsByUserId(userId: number, page = 0, size = 10): Promise<Review[] | null> {
 
         try {
-            const response = await api.get<ApiResponse<Review[]>>(`${API_ENDPOINTS.REVIEWS.BY_USER}/${userId}`);
+            const response = await api.get<ApiResponse<Review[]>>(`${API_ENDPOINTS.REVIEWS.BY_USER}/${userId}`,  { params: { page, size } }       );
             return response.data.data;
         }
         catch (error) {

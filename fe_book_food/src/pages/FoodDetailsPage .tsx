@@ -28,6 +28,7 @@ const FoodDetailsPage = () => {
         preparationTime={currentFood.preparationTime}
         rating={currentFood.rating}
         categoryName={currentFood.category?.name || "Không có"}
+        soldCount={currentFood.soldCount}
       />
     </div>
   );

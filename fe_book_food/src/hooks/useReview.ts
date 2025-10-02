@@ -11,8 +11,8 @@ export const useReview = () => {
 
     //getReviewsByFoodId
     const getReviewsByFoodId = useCallback(
-        async (foodId: number) => {
-            await dispatch(fetchReviewsByFoodAsync({ foodId })).unwrap();
+        async (foodId: number, page = 0, size = 10) => {
+            await dispatch(fetchReviewsByFoodAsync({ foodId, page, size })).unwrap();
         }, [dispatch]
     );
     // --- Get reviews by user ---
@@ -36,6 +36,10 @@ export const useReview = () => {
             try {
                 const result = await dispatch(createReviewAsync(reviewData)).unwrap();
                 toast.success("Review created successfully!");
+
+                // Refresh list & summary cho món vừa đánh giá
+                await dispatch(fetchReviewsByFoodAsync({ foodId: reviewData.foodId, page: 0, size: 10 })).unwrap();
+                await dispatch(fetchFoodSummaryAsync(reviewData.foodId)).unwrap();
                 return result;
             } catch (error: any) {
                 toast.error(error?.message || "Failed to create review");
@@ -50,7 +54,7 @@ export const useReview = () => {
         async (reviewId: number, updateReview: UpdateReviewRequest) => {
             try {
                 const result = await dispatch(
-                    updateReviewAsync({reviewId, updateReview})
+                    updateReviewAsync({ reviewId, updateReview })
                 ).unwrap();
                 toast.success("Review updated successfully!");
                 return result;

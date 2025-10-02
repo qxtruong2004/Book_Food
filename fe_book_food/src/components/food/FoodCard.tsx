@@ -12,7 +12,7 @@ interface FoodCardProps {
   image: string; // hoặc imageUrl nếu bạn đặt vậy ở BE
 }
 
-const FoodCard: React.FC<FoodCardProps> = ({ id, name, price, image }) => {
+const FoodCard: React.FC<FoodCardProps> = ({ id, name, price, image}) => {
   return (
     <div className="card h-100 shadow-sm">
       <Link to={ROUTES.foodDetail(id)}>

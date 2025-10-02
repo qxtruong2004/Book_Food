@@ -1,7 +1,7 @@
 // src/components/food/FoodDetails.tsx
 import React from "react";
 import AddToDraftButton from "./AddToDraftButton";
-
+import { formatCurrency, formatSoldCount } from "../../utils/helpers";
 
 interface FoodDetailsProps {
   id: number;
@@ -13,9 +13,10 @@ interface FoodDetailsProps {
   preparationTime: number;
   rating: number;
   categoryName: string;
+  soldCount: number;
 }
 const FoodDetails: React.FC<FoodDetailsProps> = ({
-  id, name, description, price, imageUrl, isAvailable, preparationTime, rating, categoryName
+  id, name, description, price, imageUrl, isAvailable, preparationTime, rating, categoryName, soldCount
 }) => {
   return (
     <div className="card shadow p-4">
@@ -27,7 +28,7 @@ const FoodDetails: React.FC<FoodDetailsProps> = ({
       />
       <h2>{name}</h2>
       <p className="text-muted">{description}</p>
-      <h4 className="text-danger fw-bold">{price.toLocaleString()} đ</h4>
+      <h4 className="text-danger fw-bold">{formatCurrency(price)} đ</h4>
 
       <ul className="list-unstyled mt-3">
         <li><strong>Danh mục:</strong> {categoryName}</li>
@@ -36,6 +37,7 @@ const FoodDetails: React.FC<FoodDetailsProps> = ({
           <strong>Tình trạng:</strong>{" "}
           {isAvailable ? <span className="text-success">Còn hàng</span> : <span className="text-danger">Hết hàng</span>}
         </li>
+        <li><strong>Đã bán: </strong>{formatSoldCount(soldCount)}</li>
         <li><strong>Đánh giá:</strong> ⭐ {rating.toFixed(1)}/5</li>
       </ul>
 

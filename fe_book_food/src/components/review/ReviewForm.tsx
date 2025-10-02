@@ -1,6 +1,10 @@
 // src/components/review/ReviewForm.tsx
 import React, { useState } from "react";
 
+/*
+Nhận một prop onSubmit từ cha.
+Quản lý 2 trạng thái cục bộ: rating (số sao) và comment (nội dung nhận xét).
+Khi bấm Gửi đánh giá, form ngăn reload trang, gọi onSubmit({ rating, comment }), rồi reset lại form.*/
 interface ReviewFormProps {
   onSubmit: (review: { rating: number; comment: string }) => void;
 }

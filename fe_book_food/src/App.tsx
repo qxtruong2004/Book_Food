@@ -55,6 +55,9 @@ function App() {
             <Route path={ROUTES.CHECKOUT} element={<PrivateRoute><CheckoutPage /></PrivateRoute>} />
             <Route path={ROUTES.ORDERS} element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
             <Route path={ROUTE_PATTERNS.ORDER_DETAL} element={<PrivateRoute><OrderDetailPage /></PrivateRoute>} />
+
+            {/* review */}
+            <Route path={ROUTES.REVIEW} element={<PrivateRoute><ReviewsTestPage></ReviewsTestPage></PrivateRoute>}/>
           </Route>
 
           {/* Layout cho login/register */}

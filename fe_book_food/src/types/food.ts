@@ -46,6 +46,7 @@ export interface FoodResponse {
   preparationTime: number;
   rating: number;
   category: CategoryResponse;
+  soldCount: number;
   createdAt: string;  // LocalDateTime -> string
   updatedAt: string;  // LocalDateTime -> string
 }

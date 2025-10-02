@@ -43,12 +43,15 @@ const Header: React.FC = () => {
         <Link to={ROUTES.HOME} className="nav-link">Trang chủ</Link>
         <Link to={ROUTES.CATEGORY} className="nav-link">Danh mục món ăn</Link>
         <Link to="/about-us" className="nav-link">About Us</Link>
-        <Link to="/services" className="nav-link">Services</Link>
-        <Link to="/contact" className="nav-link">Contact</Link>
+        {/* <Link to="/services" className="nav-link">Services</Link>
+        <Link to="/contact" className="nav-link">Contact</Link> */}
 
         {/* ✅ Đưa “Đơn hàng” vào menu: có món -> /checkout (chốt), không có -> /orders */}
         {isAuthenticated && (
-          <Link className="nav-link" to={ROUTES.ORDERS}>Đơn hàng của tôi</Link>
+          <>
+            <Link className="nav-link" to={ROUTES.ORDERS}>Đơn hàng của tôi</Link>
+            <Link className="nav-link text-white" to={ROUTES.REVIEW}>Đánh giá</Link>
+          </>
         )}
       </div>
 

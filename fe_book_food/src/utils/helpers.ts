@@ -60,12 +60,29 @@ export const formatDateTime = (dateString: string) => {
 };
 
 // ----- Price Helpers: hiển thị tiền, tính giá sau giảm.
-export const formatCurrency = (amount: number) => {
+export const formatCurrency = (amount: number | undefined | null): string => {
+  // Thêm check để tránh lỗi undefined/null
+  if (amount == null || isNaN(amount)) {
+    return "0";  // Fallback an toàn
+  }
   return amount.toLocaleString("vi-VN", {
     style: "currency",
     currency: "VND",
   });
 };
+
+export const formatSoldCount = (amount: number | undefined | null): string => {
+  // Thêm check để tránh lỗi undefined/null
+  if (amount == null || isNaN(amount)) {
+    return "0 món";  // Fallback an toàn
+  }
+  const formatted = amount.toLocaleString("vi-VN", {
+    style: "decimal",  // <- Đổi thành decimal cho số lượng
+  });
+  return `${formatted} món`;  // Append "món" thủ công
+};
+
+
 
 export const calcDiscountPrice = (price: number, discountPercent: number) => {
   return price - (price * discountPercent) / 100;
