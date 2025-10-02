@@ -17,5 +17,6 @@ public class OrderItemResponse {
     private Integer quantity;
     private BigDecimal price; // đơn giá
     private BigDecimal totalPrice; // quantity * price
+    private boolean isReviewed;
 }
 

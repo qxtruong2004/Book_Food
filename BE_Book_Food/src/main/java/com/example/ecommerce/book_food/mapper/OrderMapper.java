@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -54,6 +55,30 @@ public class OrderMapper {
                 .build();
     }
 
+    public OrderResponse convertToOrderResponse(Order order, Set<Long> reviewedSet) {
+        List<OrderItemResponse> itemResponses = order.getOrderItems().stream()
+                .map(oi -> convertToOrderItemResponse(oi, reviewedSet))
+                .collect(Collectors.toList());
+
+        UserResponse userResponse = convertToUserResponse(order.getUser());
+
+        return OrderResponse.builder()
+                .id(order.getId())
+                .orderNumber(order.getOrderNumber())
+                .status(order.getStatus())
+                .totalAmount(order.getTotalAmount())
+                .deliveryAddress(order.getDeliveryAddress())
+                .deliveryPhone(order.getDeliveryPhone())
+                .notes(order.getNotes())
+                .estimatedDeliveryTime(order.getEstimatedDeliveryTime())
+                .items(itemResponses)
+                .user(userResponse)
+                .createdAt(order.getCreatedAt())
+                .updatedAt(order.getUpdatedAt())
+                .build();
+    }
+
+
     //chuyển đổi order sang orderResponse để tránh lỗi do Lazy gây ra
     public List<OrderResponse> convertToOrderResponseList(List<Order> orders) {
         return orders.stream()
@@ -68,6 +93,21 @@ public class OrderMapper {
                 .quantity(orderItem.getQuantity())
                 .price(orderItem.getUnitPrice())
                 .totalPrice(orderItem.getTotalPrice())
+                .build();
+    }
+
+    // ====== 3) Map 1 OrderItem + set isReviewed ======
+    public OrderItemResponse convertToOrderItemResponse(OrderItem orderItem, Set<Long> reviewedSet) {
+        Long foodId = orderItem.getFood().getId();
+        boolean reviewed = reviewedSet.contains(foodId);
+
+        return OrderItemResponse.builder()
+                .foodId(foodId)
+                .foodName(orderItem.getFood().getName())
+                .quantity(orderItem.getQuantity())
+                .price(orderItem.getUnitPrice())
+                .totalPrice(orderItem.getTotalPrice())
+                .isReviewed(reviewed) // <-- gán cờ
                 .build();
     }
 

@@ -1,5 +1,6 @@
 package com.example.ecommerce.book_food.service;
 
+import com.example.ecommerce.book_food.Enum.OrderStatus;
 import com.example.ecommerce.book_food.dto.request.CreateReviewRequest;
 import com.example.ecommerce.book_food.dto.request.UpdateReviewRequest;
 import com.example.ecommerce.book_food.dto.respone.FoodRatingSummaryRespone;
@@ -58,6 +59,14 @@ public class ReviewService {
         }
         if(request.getRating() == null){
             throw new IllegalArgumentException("Rating cannot be null");
+        }
+
+        if (order.getStatus() != OrderStatus.SUCCEEDED) {
+            throw new IllegalStateException("Chỉ được đánh giá sau khi đơn đã giao");
+        }
+
+        if (reviewRepository.existsByUser_IdAndOrder_IdAndFood_Id(user.getId(), order.getId(), food.getId())) {
+            throw new IllegalStateException("Bạn đã đánh giá món này trong đơn này rồi");
         }
         Review review = Review.builder()
                 .food(food)

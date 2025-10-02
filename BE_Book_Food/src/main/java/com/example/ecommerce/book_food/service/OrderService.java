@@ -16,14 +16,15 @@ import com.example.ecommerce.book_food.mapper.OrderItemMapper;
 import com.example.ecommerce.book_food.mapper.OrderMapper;
 import com.example.ecommerce.book_food.repository.FoodRepository;
 import com.example.ecommerce.book_food.repository.OrderRepository;
+import com.example.ecommerce.book_food.repository.ReviewRepository;
 import com.example.ecommerce.book_food.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.math.BigDecimal;
@@ -31,7 +32,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +45,7 @@ public class OrderService {
     private final FoodRepository foodRepository;
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
+    private final ReviewRepository reviewRepository;
 
 
     //tạo order
@@ -133,8 +137,9 @@ public class OrderService {
         //tìm kiếm order
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
-
+        OrderStatus oldStatus = order.getStatus();
         order.setStatus(newStatus);
+
 
         if (newStatus == OrderStatus.PREPARING) {
             // Tính lại estimatedDeliveryTime dựa trên tổng thời gian chế biến
@@ -143,6 +148,16 @@ public class OrderService {
                     .mapToInt(item -> item.getFood().getPreparationTime() * item.getQuantity())
                     .sum();
             order.setEstimatedDeliveryTime(LocalDateTime.now().plusMinutes(totalPrepTime + 15)); // +15 for delivery
+        }
+
+        //nếu đã giao thành công thì + 1 đã bán cho món trong đó
+        // chỉ cộng khi trc đó chưa succeeded và soldApplied = false
+        if(newStatus == OrderStatus.SUCCEEDED && !order.isSoldApplied() ) {
+            for(OrderItem orderItem : order.getOrderItems()) {
+                //cập nhật atomic để tránh race condition
+                foodRepository.incrementSoldCount(orderItem.getFood().getId(), orderItem.getQuantity());
+            }
+            order.setSoldApplied(true); // đánh dấu đã áp dụng doanh số cho đơn này
         }
 
         Order updatedOrder = orderRepository.save(order);
@@ -183,7 +198,13 @@ public class OrderService {
         if(!order.getUser().getUsername().equals(username)) {
             throw new SecurityException("Bạn không có quyền xem chi tiết đơn hàng nguowfi khác");
         }
-        return orderMapper.convertToOrderResponse(order);
+        Long userId = order.getUser().getId();
+        //món nào trong đơn này đã được user review( trả về list long tức danh sách id của món ăn
+        List<Long> reviewedFoodIds = reviewRepository.findFoodIdsReviewedByUserAndOrder(userId, orderId);
+
+        //chuển ds reviewedFoodIds thành 1 tập hợp set để loại bỏ các giá trị trùng lặp
+        Set<Long> reviewedSet = new HashSet<>(reviewedFoodIds);
+        return orderMapper.convertToOrderResponse(order, reviewedSet);
     }
 
     //huỷ đơn hàng

@@ -24,4 +24,5 @@ public class FoodResponse {
     private CategoryResponse category;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long soldCount;
 }

@@ -61,7 +61,15 @@ public class JwtTokenProvider {
 
     @PostConstruct
     public void init() {
-        this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        if (jwtSecret == null) {
+            throw new IllegalStateException("jwt.secret is null");
+        }
+        jwtSecret = jwtSecret.trim(); // loại bỏ khoảng trắng vô tình
+        byte[] bytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
+        if (bytes.length < 32) {
+            throw new IllegalStateException("jwt.secret must be at least 32 bytes");
+        }
+        this.key = Keys.hmacShaKeyFor(bytes);
     }
 
     public String generateAccessToken(User user) {

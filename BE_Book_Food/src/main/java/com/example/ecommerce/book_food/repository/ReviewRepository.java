@@ -31,4 +31,13 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     //trả về review chỉ khi review thuộc user đang login.
     Optional<Review> findByIdAndUser_Username(Long reviewId, String username);
+
+    boolean existsByUser_IdAndOrder_IdAndFood_Id(Long userId, Long orderId, Long foodId);
+
+    //kiểm tra xem món ăn đã được đánh giá chưa
+    @Query("select r.food.id from Review r where r.user.id = :userId and r.order.id = :orderId")
+    List<Long> findFoodIdsReviewedByUserAndOrder(@Param("userId") Long userId,
+                                                 @Param("orderId") Long orderId);
+
+
 }

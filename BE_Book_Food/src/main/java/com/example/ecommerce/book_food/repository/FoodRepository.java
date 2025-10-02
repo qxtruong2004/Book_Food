@@ -3,8 +3,10 @@ package com.example.ecommerce.book_food.repository;
 import com.example.ecommerce.book_food.entity.Food;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,5 +30,10 @@ public interface FoodRepository extends JpaRepository<Food, Long> {
                                     @Param("minPrice") BigDecimal minPrice,
                                     @Param("maxPrice") BigDecimal maxPrice,
                                     Pageable pageable);
+
+    @Modifying
+    @Query("UPDATE  Food f set f.soldCount = f.soldCount + :delta where  f.id = :foodId")
+    void incrementSoldCount(@Param("foodId") Long foodId, @Param("delta") long delta) ;
+
 }
 

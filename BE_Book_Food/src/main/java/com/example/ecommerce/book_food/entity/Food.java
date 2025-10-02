@@ -54,6 +54,9 @@ public class Food {
     @Builder.Default
     private BigDecimal rating = BigDecimal.ZERO;
 
+    @Column(name = "sold_count", nullable = false)
+    private long soldCount = 0L;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
@@ -73,4 +76,6 @@ public class Food {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+
 }
