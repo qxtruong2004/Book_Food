@@ -10,7 +10,7 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 
 import RegisterPage from './pages/RegisterPage';
 import FoodPage from './pages/FoodPage';
-import ReviewsTestPage from './pages/ReviewsTestPage';
+import ReviewsPage from './pages/ReviewsPage';
 import LoginPage from './pages/LoginPage';
 import { ToastContainer } from 'react-toastify';
 import MainLayout from './layouts/MainLayout';
@@ -27,6 +27,7 @@ import { OrderDraftProvider } from './context/OrderDraftContext';
 import { useAuth } from './hooks/useAuth';
 import { JSX } from 'react/jsx-runtime';
 import FoodDetailsPage from './pages/FoodDetailsPage ';
+import MyReviewList from './components/review/MyReviewList';
 
 const BuggyComponent = () => {
   throw new Error("Lỗi test!");
@@ -47,17 +48,18 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path={ROUTES.HOME} element={<FoodPage />} />
             <Route path={ROUTES.CATEGORY} element={<CategoryPage />} />
-            <Route path={ROUTE_PATTERNS.FOOD_DETAIL} element={<FoodDetailsPage />} />
+            <Route path={ROUTES.REVIEW} element={<ReviewsPage />} />
+            <Route path={ROUTE_PATTERNS.FOOD_DETAIL} element={<FoodDetailsPage></FoodDetailsPage>} />
 
 
-            <Route path="/reviews" element={<ReviewsTestPage />} />
+            
             {/* Đặt hàng */}
             <Route path={ROUTES.CHECKOUT} element={<PrivateRoute><CheckoutPage /></PrivateRoute>} />
             <Route path={ROUTES.ORDERS} element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
             <Route path={ROUTE_PATTERNS.ORDER_DETAL} element={<PrivateRoute><OrderDetailPage /></PrivateRoute>} />
 
             {/* review */}
-            <Route path={ROUTES.REVIEW} element={<PrivateRoute><ReviewsTestPage></ReviewsTestPage></PrivateRoute>}/>
+            {/* <Route path={ROUTES.REVIEW} element={<PrivateRoute><ReviewsTestPage></ReviewsTestPage></PrivateRoute>}/> */}
           </Route>
 
           {/* Layout cho login/register */}

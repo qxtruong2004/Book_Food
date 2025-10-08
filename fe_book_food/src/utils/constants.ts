@@ -96,6 +96,7 @@ export const ROUTES = {
 
     CHECKOUT: "/checkout",
     REVIEW: "/my_reviews",
+    reviewDetail: (userId: number | string) => `/my_reviews/${userId}`,
 
     LOGIN: "/login",
     REGISTER: "/register",
@@ -103,6 +104,7 @@ export const ROUTES = {
     // User
     ORDERS: "/orders", // trang lịch sử đơn hàng user
     orderDetail: (id: number | string) => `/orders/${id}`,
+
 
     // Admin
     ADMIN: {
@@ -117,6 +119,7 @@ export const ROUTES = {
 export const ROUTE_PATTERNS = {
   FOOD_DETAIL: "/foods/:id",
   ORDER_DETAL: "/orders/:id",
+  REVIEW_DETAIL: "my_reviews/:userId"
 };
 
 

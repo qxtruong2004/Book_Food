@@ -6,7 +6,7 @@ const ReviewsTestPage: React.FC = () => {
   return (
     <div className="container mt-4">
       <h2>Đánh giá món ăn</h2>
-      <ReviewList />
+      {/* <ReviewList /> */}
     </div>
   );
 };

@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { reviewService } from '../services/reviewService';
-import { Review, CreateReviewRequest, UpdateReviewRequest, FoodRatingSummaryResponse } from '../types/review';
+import { ReviewResponse, CreateReviewRequest, UpdateReviewRequest, FoodRatingSummaryResponse } from '../types/review';
 
 interface ReviewState {
-    reviews: Review[];
-    userReviews: Review[];
-    foodReviews: Review[];
-    currentReview: Review | null;
+    reviews: ReviewResponse[];
+    userReviews: ReviewResponse[];
+    foodReviews: ReviewResponse[];
+    currentReview: ReviewResponse | null;
     loading: boolean;
     error: string | null;
     createLoading: boolean;
@@ -85,9 +85,9 @@ export const createReviewAsync = createAsyncThunk(
 
 export const updateReviewAsync = createAsyncThunk(
     'review/updateReview',
-    async (params: {reviewId: number, updateReview: UpdateReviewRequest}, { rejectWithValue }) => {
+    async (params: { reviewId: number, updateReview: UpdateReviewRequest }, { rejectWithValue }) => {
         try {
-            const{reviewId, updateReview} = params;
+            const { reviewId, updateReview } = params;
             const review = await reviewService.updateReview(reviewId, updateReview);
             return review;
         } catch (error: any) {
@@ -182,8 +182,19 @@ const reviewSlice = createSlice({
 
         // Fetch my reviews
         builder
+            .addCase(fetchMyReviewsAsync.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
             .addCase(fetchMyReviewsAsync.fulfilled, (state, action) => {
-                state.userReviews = action.payload;
+                state.loading = false;
+                state.reviews = action.payload; 
+                
+            })
+            .addCase(fetchMyReviewsAsync.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+                
             });
 
         // Create review
@@ -206,7 +217,7 @@ const reviewSlice = createSlice({
         // Update review
         builder
             .addCase(updateReviewAsync.fulfilled, (state, action) => {
-                const updateReviewInArray = (array: Review[]) => {
+                const updateReviewInArray = (array: ReviewResponse[]) => {
                     const index = array.findIndex(r => r.id === action.payload.id);
                     if (index !== -1) array[index] = action.payload;
                 };
