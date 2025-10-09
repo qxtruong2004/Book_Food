@@ -1,12 +1,12 @@
 
 export interface CreateCategoryRequest{
     name: string;
-    description: string;
+    description?: string;
 }
 
 export interface UpdateCategoryRequest{
     name: string;
-    description: string;
+    description?: string;
 }
 
 export interface CategoryResponse{

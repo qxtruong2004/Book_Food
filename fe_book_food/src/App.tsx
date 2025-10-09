@@ -28,6 +28,14 @@ import { useAuth } from './hooks/useAuth';
 import { JSX } from 'react/jsx-runtime';
 import FoodDetailsPage from './pages/FoodDetailsPage ';
 import MyReviewList from './components/review/MyReviewList';
+import ProtectedRouter from './components/auth/ProtectedRoute';
+import AdminDashboard from './pages/admin/AdminDashboardPage';
+import Dashboard from './components/admin/Dashboard';
+import AdminFoods from './pages/admin/AdminFoods';
+import AdminOrders from './pages/admin/AdminOrders';
+import AdminRedirectOnHome from './components/auth/AdminRedirectOnHome';
+import AdminCategory from './pages/admin/AdminCategoryPage';
+import AdminCategoryPage from './pages/admin/AdminCategoryPage';
 
 const BuggyComponent = () => {
   throw new Error("Lỗi test!");
@@ -41,33 +49,59 @@ function PrivateRoute({ children }: { children: JSX.Element }) {
 function App() {
   return (
     <>
-    {/* phần OrderDraftProvider bao ngoài vì Header vẫn muốn hiện badge, Header phải nằm bên trong Provider; mà Header thường ở MainLayout bao toàn bộ → */}
-      <OrderDraftProvider> 
+      {/* phần OrderDraftProvider bao ngoài vì Header vẫn muốn hiện badge, Header phải nằm bên trong Provider; mà Header thường ở MainLayout bao toàn bộ → */}
+      <OrderDraftProvider>
         <Routes>
           {/* Layout chính */}
           <Route element={<MainLayout />}>
-            <Route path={ROUTES.HOME} element={<FoodPage />} />
+            {/* Home (index) — đã bọc guard */}
+            <Route
+              index
+              element={
+                <AdminRedirectOnHome>
+                  <FoodPage />
+                </AdminRedirectOnHome>
+              }
+            />
+
+            {/* các route còn lại giữ nguyên */}
             <Route path={ROUTES.CATEGORY} element={<CategoryPage />} />
             <Route path={ROUTES.REVIEW} element={<ReviewsPage />} />
-            <Route path={ROUTE_PATTERNS.FOOD_DETAIL} element={<FoodDetailsPage></FoodDetailsPage>} />
+            <Route path={ROUTE_PATTERNS.FOOD_DETAIL} element={<FoodDetailsPage />} />
 
-
-            
             {/* Đặt hàng */}
             <Route path={ROUTES.CHECKOUT} element={<PrivateRoute><CheckoutPage /></PrivateRoute>} />
             <Route path={ROUTES.ORDERS} element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
             <Route path={ROUTE_PATTERNS.ORDER_DETAL} element={<PrivateRoute><OrderDetailPage /></PrivateRoute>} />
 
-            {/* review */}
-            {/* <Route path={ROUTES.REVIEW} element={<PrivateRoute><ReviewsTestPage></ReviewsTestPage></PrivateRoute>}/> */}
+            {/* (BỎ route path="/" trùng lặp đi) */}
+            {/* <Route path="/" element={<AdminRedirectOnHome>...</AdminRedirectOnHome>} /> */}
+
           </Route>
+
 
           {/* Layout cho login/register */}
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            {/* Admin */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRouter roles={["ADMIN"]}>
+                  <AdminDashboard />
+                </ProtectedRouter>
+              }
+            >
+              <Route index element={<Dashboard />} />
+              <Route path="foods" element={<AdminFoods />} />
+              <Route path="orders" element={<AdminOrders />} />
+              <Route path="categories" element={<AdminCategoryPage />} />
+              <Route path="*" element={<Navigate to="/admin" replace />} />
+            </Route>
           </Route>
         </Routes>
+        
       </OrderDraftProvider>
 
       {/* Toast đặt ngoài cùng để toàn app đều gọi được */}

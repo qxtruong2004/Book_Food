@@ -7,6 +7,10 @@ import { UserLoginRequest, UserRegisterRequest } from "../types/auth"
 import { clearCredentials, clearError, getCurrentUserAsync, loginAsync, logoutAsync, refreshTokenAsync, registerAsync } from "../store/authSlice"
 import { ROUTES } from "../utils/constants";
 
+const normalizeRole = (r?: string) =>
+  (r ? r.toUpperCase().replace(/^ROLE_/, "") : "USER");
+
+
 export const useAuth = () => {
     const dispatch = useDispatch<AppDispatch>();
     //Lấy hàm điều hướng của react-router-dom (vào trang khác bằng navigate('/path')).
