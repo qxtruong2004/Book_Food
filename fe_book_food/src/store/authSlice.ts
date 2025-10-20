@@ -74,7 +74,20 @@ export const registerAsync = createAsyncThunk('auth/register',
             );
         }
     }
-)
+);
+
+export const adminCreateUserAsync = createAsyncThunk(
+  "admin/users/create",
+  async (dto: UserRegisterRequest, { rejectWithValue }) => {
+    try {
+      const res = await authService.adminCreateUser(dto);
+      if (!res?.success) return rejectWithValue(res?.message || "Create failed");
+      return res.data; // user vừa tạo
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.message || e.message);
+    }
+  }
+);
 
 export const getCurrentUserAsync = createAsyncThunk(
     'auth/me',

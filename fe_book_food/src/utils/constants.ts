@@ -21,12 +21,13 @@ export const API_ENDPOINTS = {
         BASE: "/users",
         MY_PROFILE: "/users/my_profile",
         BY_ID: (id: number) => `/users/${id}`,
-        ALL: "/users",
+        ALL: "/users/all",
         UPDATE_PROFILE: "/users/update_profile",
         UPDATE_BY_ID: (id: number) => `/users/${id}`,
         BLOCKED: "/users/blocked",
         ACTIVE: "/users/active",
         CHANGE_STATUS: (id: number) => `/users/status/${id}`,
+        SEARCH: "/users"
     },
     CATEGORIES: {
         BASE: "/categories",

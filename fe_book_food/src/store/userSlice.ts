@@ -1,6 +1,7 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { userService } from '../services/userService';
-import { UserResponse, UpdateUserRequest, ChangeStatusUserRequest } from '../types/user';
+import { UserResponse, UpdateUserRequest, ChangeStatusUserRequest, UserSearchParams } from '../types/user';
+import { Page } from '../types/page';
 
 interface UserState {
     users: UserResponse[];
@@ -11,6 +12,8 @@ interface UserState {
     loading: boolean;
     error: string | null;
     updateLoading: boolean;
+    pagedUsers: Page<UserResponse> | null;
+    userQuery: UserSearchParams;
 }
 
 const initialState: UserState = {
@@ -22,6 +25,9 @@ const initialState: UserState = {
     loading: false,
     error: null,
     updateLoading: false,
+
+    pagedUsers: null,
+    userQuery: { page: 0, size: 10, sort: "id,asc", name: "" },
 };
 
 // --- Async Thunks ---
@@ -67,6 +73,20 @@ export const fetchAllUsersAsync = createAsyncThunk(
         }
     }
 );
+
+//lấy tất cả user + phân trang
+export const searchUsersAsync = createAsyncThunk(
+    'user/searchUsers',
+    async (params: UserSearchParams, { rejectWithValue }) => {
+        try {
+            const page = await userService.searchUsers(params);
+            return { page, params };
+        }
+        catch (error: any) {
+            return rejectWithValue(error.message || "Failed to search users");
+        }
+    }
+)
 
 // Lấy user bị block
 export const fetchBlockedUsersAsync = createAsyncThunk(
@@ -146,6 +166,10 @@ const userSlice = createSlice({
         clearSelectedUser: (state) => {
             state.selectedUser = null;
         },
+        // 👇 reducer để cập nhật query
+        setUserQuery: (s, a: PayloadAction<Partial<UserSearchParams>>) => {
+            s.userQuery = { ...s.userQuery, ...a.payload };
+        },
     },
     extraReducers: (builder) => {
         // Fetch my profile
@@ -172,6 +196,29 @@ const userSlice = createSlice({
         builder.addCase(fetchAllUsersAsync.fulfilled, (state, action) => {
             state.users = action.payload;
         });
+
+        //search +phân trang
+        builder
+            .addCase(searchUsersAsync.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(searchUsersAsync.fulfilled, (state, action) => {
+                state.loading = false;
+                state.pagedUsers = action.payload.page;
+                // Đồng bộ query hiện hành (để UI hiển thị đúng)
+                state.userQuery = { ...state.userQuery, ...action.payload.params };
+
+                // Nếu lỡ ở trang vượt quá totalPages (vd vừa xoá nhiều bản ghi) → tự lùi lại (UI sẽ gọi lại)
+                const p = action.payload.page;
+                if (p.totalPages > 0 && p.number >= p.totalPages) {
+                    state.userQuery.page = p.totalPages - 1;
+                }
+            })
+            .addCase(searchUsersAsync.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            });
 
         // Fetch blocked users
         builder.addCase(fetchBlockedUsersAsync.fulfilled, (state, action) => {
@@ -216,5 +263,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { clearError, clearSelectedUser } = userSlice.actions;
+export const { clearError, clearSelectedUser, setUserQuery } = userSlice.actions;
 export default userSlice.reducer;

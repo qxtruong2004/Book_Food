@@ -1,4 +1,5 @@
-import { ChangeStatusUserRequest, UpdateUserRequest, UserResponse } from "../types/user";
+import { Page } from "../types/page";
+import { ChangeStatusUserRequest, UpdateUserRequest, UserResponse, UserSearchParams, UserStatus } from "../types/user";
 import { API_ENDPOINTS, TOKEN_KEY } from "../utils/constants";
 import { api, ApiResponse } from "./api";
 
@@ -40,6 +41,25 @@ export const userService = {
             console.error("Create review error: ", error);
             return null;
         }
+    },
+
+    //lấy ds người dùng có phân trang
+    async searchUsers(params: UserSearchParams): Promise<Page<UserResponse>> {
+        // Giá trị mặc định an toàn
+        const query: Record<string, any> = {
+            page: params.page ?? 0,
+            size: params.size ?? 10,
+            sort: params.sort ?? "id,asc",
+            name: params.name && params.name.trim() !== "" ? params.name.trim() : undefined,
+        };
+
+        //nếu có status hoặc status khác all thì mới set status vào query
+        if (params.status && params.status !== 'ALL') {
+            query.status = params.status;
+        }
+
+        const response = await api.get<ApiResponse<Page<UserResponse>>>(API_ENDPOINTS.USERS.SEARCH, { params: query });
+        return response.data.data;
     },
 
     //người dùng cập nhật thông tin bản thân

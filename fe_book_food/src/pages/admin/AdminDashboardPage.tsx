@@ -80,7 +80,7 @@ export default function AdminDashboard() {
                         Quản lý đơn hàng
                     </NavLink>
                     <NavLink
-                        to="/admin/revenue"
+                        to="/admin/users"
                         end
                         className={({ isActive }) =>
                             `nav-link d-flex align-items-center px-3 py-2 rounded mb-1 ${isActive ? "bg-success active" : "text-dark"}`

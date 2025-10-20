@@ -24,6 +24,12 @@ export const authService = {
         );
         return response.data;// { success, message, data }
     },
+
+    //admin create user
+    async adminCreateUser(dto: UserRegisterRequest){
+        const res = await api.post<ApiResponse<AuthResponse>>(API_ENDPOINTS.AUTH.REGISTER, dto)
+        return res.data;
+    },
  
     //logout
     async logout() : Promise<void>{

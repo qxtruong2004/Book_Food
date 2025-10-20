@@ -1,13 +1,14 @@
 import { useDispatch, useSelector } from "react-redux"
 import { AppDispatch, RootState } from "../store"
-import { useCallback } from "react";
-import { changeUserStatusAsync, clearError, clearSelectedUser, fetchActiveUsersAsync, fetchAllUsersAsync, fetchBlockedUsersAsync, fetchMyProfileAsync, fetchUserByIdAsync, updateUserByIdAsync, updateUserByUserAsync } from "../store/userSlice";
-import { ChangeStatusUserRequest, UpdateUserRequest } from "../types/user";
+import { useCallback, useState } from "react";
+import { changeUserStatusAsync, clearError, clearSelectedUser, fetchActiveUsersAsync, fetchAllUsersAsync, fetchBlockedUsersAsync, fetchMyProfileAsync, fetchUserByIdAsync, searchUsersAsync, setUserQuery, updateUserByIdAsync, updateUserByUserAsync } from "../store/userSlice";
+import { ChangeStatusUserRequest, StatusKey, UpdateUserRequest, UserSearchParams } from "../types/user";
 import toast from "react-hot-toast";
+
 
 export const useUser = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { currentUser, selectedUser, users, blockedUsers, activeUsers, loading, updateLoading, error, } = useSelector((state: RootState) => state.user);
+    const { currentUser, selectedUser, users, blockedUsers, activeUsers, loading, updateLoading, error, pagedUsers, userQuery } = useSelector((state: RootState) => state.user);
 
     //lấy profile của user đang đăng nhập
     const getMyProfile = useCallback(async () => {
@@ -39,6 +40,28 @@ export const useUser = () => {
         async () => await dispatch(fetchAllUsersAsync()).unwrap(),
         [dispatch]
     );
+
+    //search + phân trang
+    const searchUsers = useCallback(
+        async (params?: Partial<UserSearchParams>) => {
+            const merged = { ...userQuery, ...(params ?? {}) };
+            return await dispatch(searchUsersAsync(merged)).unwrap();
+        }
+        , [dispatch, userQuery]
+    );
+
+    // ➕ Helpers thay đổi query
+    const setQuery = useCallback(
+        (patch: Partial<UserSearchParams>) => dispatch(setUserQuery(patch)),
+        [dispatch]
+    );
+
+    const goToPage = useCallback((page: number) => setQuery({ page }), [setQuery]);
+    const setSize = useCallback((size: number) => setQuery({ page: 0, size }), [setQuery]);
+    const setSort = useCallback((sort: string) => setQuery({ page: 0, sort }), [setQuery]);
+    const setName = useCallback((name: string) => setQuery({ page: 0, name }), [setQuery]);
+
+    const [statusFilter, setStatusFilter] = useState<StatusKey>('ALL');
 
     //lấy danh sách user bị block
     const getBlockedUsers = useCallback(
@@ -88,6 +111,9 @@ export const useUser = () => {
         loading,
         updateLoading,
         error,
+        pagedUsers,
+        userQuery,
+        statusFilter,
 
         // Profile
         getMyProfile,
@@ -100,6 +126,13 @@ export const useUser = () => {
         getActiveUsers,
         updateUserByAdmin,
         changeUserStatus,
+        searchUsers,
+        setQuery,
+        goToPage,
+        setSize,
+        setSort,
+        setName,
+        setStatusFilter,
 
         // Slice utilities
         clearError: () => dispatch(clearError()),

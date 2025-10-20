@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from "../store"
 import { useNavigate } from "react-router-dom"
 import { useCallback } from "react"
 import { UserLoginRequest, UserRegisterRequest } from "../types/auth"
-import { clearCredentials, clearError, getCurrentUserAsync, loginAsync, logoutAsync, refreshTokenAsync, registerAsync } from "../store/authSlice"
+import { adminCreateUserAsync, clearCredentials, clearError, getCurrentUserAsync, loginAsync, logoutAsync, refreshTokenAsync, registerAsync } from "../store/authSlice"
 import { ROUTES } from "../utils/constants";
 
 const normalizeRole = (r?: string) =>
@@ -67,6 +67,20 @@ export const useAuth = () => {
         },
         [dispatch, navigate]
     );
+
+    const adminCreateAccount = useCallback(
+        async (userData: UserRegisterRequest) => {
+            try {
+                const result = await dispatch(adminCreateUserAsync(userData)).unwrap();
+
+                return result;
+            } catch (err: any) {
+                throw err;
+            }
+        },
+        [dispatch]
+    );
+
 
     // Logout function
     const logout = useCallback(async () => {
@@ -163,6 +177,7 @@ export const useAuth = () => {
         // Actions
         login,
         register,
+        adminCreateAccount,
         logout,
         getCurrentUser,
         refreshAccessToken,

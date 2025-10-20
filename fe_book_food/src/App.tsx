@@ -36,6 +36,7 @@ import AdminOrders from './pages/admin/AdminOrders';
 import AdminRedirectOnHome from './components/auth/AdminRedirectOnHome';
 import AdminCategory from './pages/admin/AdminCategoryPage';
 import AdminCategoryPage from './pages/admin/AdminCategoryPage';
+import AdminUserPage from './pages/admin/AdminUserPage';
 
 const BuggyComponent = () => {
   throw new Error("Lỗi test!");
@@ -97,6 +98,7 @@ function App() {
               <Route path="foods" element={<AdminFoods />} />
               <Route path="orders" element={<AdminOrders />} />
               <Route path="categories" element={<AdminCategoryPage />} />
+              <Route path="users" element={<AdminUserPage />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </Route>
           </Route>
