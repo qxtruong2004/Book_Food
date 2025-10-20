@@ -2,6 +2,8 @@ package com.example.ecommerce.book_food.repository;
 
 import com.example.ecommerce.book_food.Enum.UserStatus;
 import com.example.ecommerce.book_food.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -21,5 +23,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Kiểm tra username đã tồn tại chưa
     boolean existsByUsername(String username);
 
-    List<User> findByStatus(UserStatus status);
+    Page<User> findByStatus(UserStatus status,  Pageable pageable);
+
+    Page<User> findByFullNameContainingIgnoreCase(String fullName, Pageable pageable);
+    Page<User> findByStatusAndFullNameContainingIgnoreCase(UserStatus status, String name, Pageable pageable);
 }

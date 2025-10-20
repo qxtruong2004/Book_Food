@@ -17,12 +17,14 @@ import com.example.ecommerce.book_food.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -43,6 +45,9 @@ public class UserService {
     public UserResponse updateUserByAdmin(Long id, UpdateUserRequest request) throws UserNotFoundException{
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        if(!request.getEmail().equals(user.getEmail())){
+            throw new EmailAlreadyExistsException("Email already exists");
+        }
         user.setFullName(request.getName());
         user.setPhone(request.getPhone());
         user.setEmail(request.getEmail());
@@ -86,19 +91,19 @@ public class UserService {
                 .toList();
     }
 
-    //Lấy danh sách các user bị khóa
-    public List<UserResponse> getBlockedUsers(){
-        return userRepository.findByStatus(UserStatus.BLOCKED).stream()
-                .map(userMapper::toResponse)
-                .toList();
-    }
-
-    //Lấy danh sách các user còn hoạt động
-    public List<UserResponse> getActiveUsers(){
-        return userRepository.findByStatus(UserStatus.ACTIVE).stream()
-                .map(userMapper::toResponse)
-                .toList();
-    }
+//    //Lấy danh sách các user bị khóa
+//    public List<UserResponse> getBlockedUsers(){
+//        return userRepository.findByStatus(UserStatus.BLOCKED).stream()
+//                .map(userMapper::toResponse)
+//                .toList();
+//    }
+//
+//    //Lấy danh sách các user còn hoạt động
+//    public List<UserResponse> getActiveUsers(){
+//        return userRepository.findByStatus(UserStatus.ACTIVE).stream()
+//                .map(userMapper::toResponse)
+//                .toList();
+//    }
 
     //đổi mật khẩu
 
@@ -118,6 +123,25 @@ public class UserService {
         userRepository.save(user);
         return userMapper.toResponse(user);
     }
+
+    //search user
+   public Page<UserResponse> searchUsers(String name, UserStatus status, Pageable pageable){
+       boolean hasName = name != null && !name.isBlank(); //nếu có name = true
+       Page<User> page;
+        if(!hasName && status == null){
+            page = userRepository.findAll(pageable); // ALL
+        }
+        else if (!hasName) { //nếu kh có tên
+            page = userRepository.findByStatus(status, pageable); // chỉ lọc theo status
+        }
+        else if (status == null) {
+            page = userRepository.findByFullNameContainingIgnoreCase(name.trim(), pageable); // chỉ tên
+        }
+        else {
+            page = userRepository.findByStatusAndFullNameContainingIgnoreCase(status, name.trim(), pageable); // cả hai
+        }
+        return page.map(userMapper::toResponse);
+   }
 
 
 }

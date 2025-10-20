@@ -1,5 +1,6 @@
 package com.example.ecommerce.book_food.controller;
 
+import com.example.ecommerce.book_food.Enum.UserStatus;
 import com.example.ecommerce.book_food.dto.request.ChangeStatusUserRequest;
 import com.example.ecommerce.book_food.dto.request.UpdateUserRequest;
 import com.example.ecommerce.book_food.dto.respone.ApiResponse;
@@ -9,6 +10,9 @@ import com.example.ecommerce.book_food.exception.UserNotFoundException;
 import com.example.ecommerce.book_food.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -42,9 +46,21 @@ public class UserController {
 
     //lấy thông tin tất cả người dùng
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
         List<UserResponse> users = userService.getAllUsers();
+        return ResponseEntity.ok(ApiResponse.success(users));
+    }
+
+    //lay ds người dùng có phân trang
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<UserResponse>>> searcUsers(
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(required = false) UserStatus status,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
+        Page<UserResponse> users = userService.searchUsers(name,status, pageable);
         return ResponseEntity.ok(ApiResponse.success(users));
     }
 
@@ -66,21 +82,21 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(userUpdate));
     }
 
-    //lấy danh sách user bị khóa
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/blocked")
-    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsersByBlocked() {
-        List<UserResponse> users = userService.getBlockedUsers();
-        return ResponseEntity.ok(ApiResponse.success(users));
-    }
-
-    // Lấy danh sách các user còn hoạt động
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/active")
-    public ResponseEntity<ApiResponse<List<UserResponse>>> getActiveUsers() {
-        List<UserResponse> activeUsers = userService.getActiveUsers();
-        return ResponseEntity.ok(ApiResponse.success(activeUsers));
-    }
+//    //lấy danh sách user bị khóa
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @GetMapping("/blocked")
+//    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsersByBlocked() {
+//        List<UserResponse> users = userService.getBlockedUsers();
+//        return ResponseEntity.ok(ApiResponse.success(users));
+//    }
+//
+//    // Lấy danh sách các user còn hoạt động
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @GetMapping("/active")
+//    public ResponseEntity<ApiResponse<List<UserResponse>>> getActiveUsers() {
+//        List<UserResponse> activeUsers = userService.getActiveUsers();
+//        return ResponseEntity.ok(ApiResponse.success(activeUsers));
+//    }
 
 
     //thay đổi trạng thái tài khoản của user( cả active và block)

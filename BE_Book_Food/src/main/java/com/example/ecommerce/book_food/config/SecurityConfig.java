@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests( authz -> authz
                         //ai cũng truy cập được(login, register, danh mục sản phẩm, xem sản phẩm)
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/foods/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/reviews/foods/**").permitAll()
