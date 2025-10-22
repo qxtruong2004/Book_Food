@@ -51,6 +51,8 @@ export interface FoodResponse {
   updatedAt: string;  // LocalDateTime -> string
 }
 
+
+
 export interface FoodRatingSummaryResponse{
     averageRating: number;
     totalReviews: number;

@@ -1,6 +1,7 @@
 package com.example.ecommerce.book_food.repository;
 
 import com.example.ecommerce.book_food.entity.Food;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -16,7 +17,7 @@ public interface FoodRepository extends JpaRepository<Food, Long> {
     List<Food> findByCategoryIdAndIsAvailableTrue(Long categoryId, Pageable pageable);
 
     //Lấy các Food còn hàng, sắp xếp theo createdAt giảm dần → tức là món mới nhất trước
-    List<Food> findByIsAvailableTrueOrderByCreatedAtDesc(Pageable pageable);
+    Page<Food> findByIsAvailableTrueOrderByCreatedAtDesc(Pageable pageable);
 
     //Tìm Food theo tên, không phân biệt hoa/thường, chỉ lấy món còn hàng.
     List<Food> findByNameContainingIgnoreCaseAndIsAvailableTrue(String name, Pageable pageable);

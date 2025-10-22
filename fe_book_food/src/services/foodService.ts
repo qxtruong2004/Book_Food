@@ -2,8 +2,17 @@ import axios from "axios";
 import { CreateFoodRequest, Food, FoodResponse, FoodSearchParams, UpdateFoodRequest } from "../types/food";
 import { API_ENDPOINTS } from "../utils/constants";
 import { api, ApiResponse } from "./api";
+import { Page } from "../types/page";
 
 export const foodService = {
+    //lấy tất cả món ăn có phân trang phía admin
+    async getAllFoodsByAdmin(page = 0, size = 10): Promise<Page<FoodResponse>>{
+        const res = await api.get<ApiResponse<any>>(API_ENDPOINTS.FOODS.ALL, {params: {page, size}});
+
+        const payload = res.data.data;
+        return payload;
+    },
+
     // Lấy tất cả món ăn, phân trang
     async getAllFoods(page = 0, size = 10): Promise<Food[] | null> {
         try {

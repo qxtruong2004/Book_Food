@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, isRejectedWithValue } from "@reduxjs/toolkit";
 import { foodService } from "../services/foodService";
 import {
     FoodResponse,
@@ -7,10 +7,12 @@ import {
     FoodSearchParams,
     Food,
 } from "../types/food";
+import { Page } from "../types/page";
 
 interface FoodState {
     foods: Food[];
     categoryFoods: Food[];
+    managerFood: Page<FoodResponse> | null;
     searchResults: FoodResponse[];
     currentFood: FoodResponse | null;
     loading: boolean;
@@ -24,6 +26,7 @@ const initialState: FoodState = {
     foods: [],
     categoryFoods: [],
     searchResults: [],
+    managerFood: null,
     currentFood: null,
     loading: false,
     error: null,
@@ -34,7 +37,7 @@ const initialState: FoodState = {
 
 // --- Async thunks ---
 
-// Lấy tất cả món ăn
+// Lấy tất cả món ăn phía user
 export const fetchAllFoodsAsync = createAsyncThunk(
     "food/fetchAllFoods",
     async ({ page = 0, size = 10 }: { page?: number; size?: number }, { rejectWithValue }) => {
@@ -47,6 +50,23 @@ export const fetchAllFoodsAsync = createAsyncThunk(
         }
     }
 );
+
+//lấy tất cả món ăn phía admin
+export const fetchAllFoodsByAdminAsync = createAsyncThunk("foods/fetchAllFoodsByAdmin",
+    async ({page = 0, size = 10}: {page?: number, size?: number}, {rejectWithValue}) =>{
+        try{
+            const result = await foodService.getAllFoodsByAdmin(page, size);
+            if (!result?.content || result.content.length === 0) {
+                console.warn('⚠️ Content rỗng ở page', page);
+                return { ...result, content: [] };  // Giữ Page nhưng empty
+            }
+            return result;
+        }
+        catch (error: any) {
+            return rejectWithValue(error.message || "Failed to fetch foods");
+        }
+    }
+)
 
 // Lấy món ăn theo category
 export const fetchFoodsByCategoryAsync = createAsyncThunk(
@@ -140,6 +160,12 @@ export const deleteFoodAsync = createAsyncThunk(
     }
 );
 
+//lấy tất cả món ăn + phân trang
+// export const searchFoodAdmin = createAsyncThunk(
+//     "foods/searchFoods",
+//     async(params: )
+// )
+
 // --- Slice ---
 const foodSlice = createSlice({
     name: "food",
@@ -156,7 +182,7 @@ const foodSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        // Fetch all foods
+        // Fetch all foods by user
         builder
             .addCase(fetchAllFoodsAsync.pending, (state) => {
                 state.loading = true;
@@ -167,6 +193,21 @@ const foodSlice = createSlice({
                 state.foods = action.payload || [];
             })
             .addCase(fetchAllFoodsAsync.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            });
+
+        //lấy tất cả món ăn phía admin
+        builder
+            .addCase(fetchAllFoodsByAdminAsync.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchAllFoodsByAdminAsync.fulfilled, (state, action) => {
+                state.loading = false;
+                state.managerFood = action.payload;
+            })
+            .addCase(fetchAllFoodsByAdminAsync.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
             });

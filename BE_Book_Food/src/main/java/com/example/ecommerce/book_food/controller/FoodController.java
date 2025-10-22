@@ -8,6 +8,7 @@ import com.example.ecommerce.book_food.entity.Food;
 import com.example.ecommerce.book_food.service.FoodService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -24,10 +25,10 @@ public class FoodController {
     private final FoodService foodService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<FoodResponse>>> getAllFoods(
+    public ResponseEntity<ApiResponse<Page<FoodResponse>>> getAllFoods(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        List<FoodResponse> foods = foodService.getAllFoods(page, size);
+        Page<FoodResponse> foods = foodService.getAllFoods(page, size);
         return ResponseEntity.ok(ApiResponse.success(foods));
     }
 

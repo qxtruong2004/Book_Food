@@ -5,6 +5,7 @@ import { RootState, AppDispatch } from "../store";
 import {
   fetchAllFoodsAsync,
   fetchFoodsByCategoryAsync,
+  fetchAllFoodsByAdminAsync,
   fetchFoodByIdAsync,
   searchFoodsAsync,
   createFoodAsync,
@@ -22,6 +23,7 @@ export const useFood = () => {
   // state từ foodSlice
   const {
     foods,
+    managerFood,
     categoryFoods,
     searchResults,
     currentFood,
@@ -32,7 +34,7 @@ export const useFood = () => {
     deleteLoading,
   } = useSelector((state: RootState) => state.food);
 
-  // Lấy tất cả món ăn
+  // Lấy tất cả món ăn phía user
   const fetchAllFoods = useCallback(
     async (page = 0, size = 10) => {
       try {
@@ -44,6 +46,20 @@ export const useFood = () => {
     },
     [dispatch]
   );
+
+  //lấy tất cả món ăn phía admin
+  const fetchAllFoodsAdmin = useCallback(
+    async (page = 0, size = 10) => {
+      try {
+        return await dispatch(fetchAllFoodsByAdminAsync({ page, size })).unwrap();
+       
+      }
+      catch (err: any) {
+        toast.error(err || "Failed to fetch foods");
+        throw err;
+      }
+    }, [dispatch]
+  )
 
   // Lấy món ăn theo category
   const fetchFoodsByCategory = useCallback(
@@ -59,6 +75,7 @@ export const useFood = () => {
     },
     [dispatch]
   );
+
 
   // Lấy món ăn theo id
   const fetchFoodById = useCallback(
@@ -146,6 +163,7 @@ export const useFood = () => {
   return {
     // state
     foods,
+    managerFood,
     categoryFoods,
     searchResults,
     currentFood,
@@ -158,6 +176,7 @@ export const useFood = () => {
     // actions
     fetchAllFoods,
     fetchFoodsByCategory,
+    fetchAllFoodsAdmin,
     fetchFoodById,
     searchFoods,
     createFood,
