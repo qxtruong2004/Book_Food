@@ -1,7 +1,7 @@
-// src/components/category/CategoryFormModal.tsx
+// src/components/food/FoodFormModal.tsx
 import React, { useEffect, useState } from "react";
-import { CategoryResponse, CreateCategoryRequest } from "../../../types/category";
-import { CreateFoodRequest, FoodResponse, UpdateFoodRequest } from "../../../types/food";
+import { CategoryResponse } from "../../../types/category";
+import { CreateFoodRequest, UpdateFoodRequest } from "../../../types/food";
 import { toast } from "react-toastify";
 import { useCategory } from "../../../hooks/useCategory";
 
@@ -11,11 +11,12 @@ type OnSubmit = (dto: CreateFoodRequest | UpdateFoodRequest, ctx: SubmitCtx) => 
 interface Props {
     mode: "create" | "edit";
     initial?: {
+        id?: number;
         name: string;
         description?: string;
         price: number;
         imageUrl?: string;
-        categoryId: number;
+        category: CategoryResponse;
         preparationTime: number;
         isAvailable?: boolean;
     };
@@ -24,42 +25,64 @@ interface Props {
 }
 
 const FoodFormModal: React.FC<Props> = ({ mode, initial, onClose, onSubmit }) => {
+    const { categories, getAllCategories } = useCategory();
+    useEffect(() => { getAllCategories(); }, [getAllCategories]);
+
+    // --- STATE ---
     const [name, setName] = useState(initial?.name ?? "");
     const [description, setDescription] = useState(initial?.description ?? "");
-    const [price, setPrice] = useState(initial?.price ?? 0);
+    const [price, setPrice] = useState<string>(initial ? String(initial.price) : "");
     const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
-    const [categoryId, setCategoryId] = useState(initial?.categoryId ?? 1);
-    const [preparationTime, setPreparationTime] = useState(initial?.preparationTime ?? 1);
-    const [isAvailable, setIsAvailable] = useState(initial?.isAvailable ?? "");
+    const [categoryId, setCategoryId] = useState<string>(
+        initial?.category?.id ? String(initial.category.id) : ""
+    );
+    const [preparationTime, setPreparationTime] = useState<string>(
+        initial ? String(initial.preparationTime) : ""
+    );
+    const [isAvailable, setIsAvailable] = useState<string>(
+        initial?.isAvailable === true ? "1" : initial?.isAvailable === false ? "0" : ""
+    );
 
     const [submitting, setSubmitting] = useState(false);
+    const disabled = submitting || !name.trim();
 
-    const title = mode === "create" ? "Thêm món ăn" : "Sửa món ăn";
-    const disabled = !name.trim() || submitting;
-
-    
-    const {categories, getAllCategories} = useCategory();
-    useEffect(() => {
-  getAllCategories();          // nạp dữ liệu
-}, [getAllCategories]);
+    // --- HANDLE SUBMIT ---
     const submit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (disabled) return;
         setSubmitting(true);
+
+        const priceNum = price === "" ? NaN : Number(price);
+        const prepNum = preparationTime === "" ? NaN : Number(preparationTime);
+        const catIdNum = categoryId === "" ? NaN : Number(categoryId);
+        const availBool = isAvailable === "1";
+
         try {
             if (mode === "create") {
-                const payload: CreateFoodRequest = { name, description, price, imageUrl, categoryId, preparationTime };
+                const payload: CreateFoodRequest = {
+                    name,
+                    description,
+                    price: priceNum,
+                    imageUrl,
+                    categoryId: catIdNum,
+                    preparationTime: prepNum,
+                };
                 await onSubmit(payload, { mode: "create" });
-                onClose();
-                toast.success("Đã tạo mới món ăn thành công")
+                toast.success("Đã tạo mới món ăn thành công!");
+            } else {
+                const payload: UpdateFoodRequest = {
+                    name,
+                    description,
+                    price: priceNum,
+                    imageUrl,
+                    categoryId: catIdNum,
+                    preparationTime: prepNum,
+                    isAvailable: availBool,
+                };
+                await onSubmit(payload, { mode: "edit", id: initial?.id });
+                toast.success("Đã cập nhật món ăn thành công!");
             }
-            // else {
-            //     const payload: UpdateUserRequest = { name: fullName, phone, email, address, ...(password ? { password } : {}) };
-            //     await onSubmit(payload, { mode: "edit", id: initial?.id });
-            //     toast.success("Đã cập nhật tài khoản thành công")
-            //     onClose();
-            // }
-
+            onClose();
         } finally {
             setSubmitting(false);
         }
@@ -67,63 +90,116 @@ const FoodFormModal: React.FC<Props> = ({ mode, initial, onClose, onSubmit }) =>
 
     return (
         <div className="modal fade show d-block" tabIndex={-1} style={{ background: "#00000055" }}>
-            <div className="modal-dialog">
+            {/* 🔸 tăng độ rộng modal */}
+            <div className="modal-dialog modal-lg">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title">{title}</h5>
+                        <h5 className="modal-title">{mode === "create" ? "Thêm món ăn" : "Sửa món ăn"}</h5>
                         <button type="button" className="btn-close" onClick={onClose}></button>
                     </div>
 
                     <form onSubmit={submit}>
                         <div className="modal-body">
-                            {/* CREATE MODE */}
-                            {mode === "create" && (
-                                <>
-                                    <div className="mb-3">
-                                        <label className="form-label">Tên món <span className="text-danger">*</span></label>
-                                        <input className="form-control" value={name} onChange={e => setName(e.target.value)} autoComplete="off" name="new-username" />
-                                    </div>
+                            {/* Tên món */}
+                            <div className="mb-3">
+                                <label className="form-label">
+                                    Tên món <span className="text-danger">*</span>
+                                </label>
+                                <input
+                                    className="form-control"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    autoComplete="off"
+                                    placeholder="Nhập tên món ăn"
+                                />
+                            </div>
 
-                                    <div className="mb-3">
-                                        <label className="form-label">Mô tả <span className="text-danger">*</span></label>
-                                        <input className="form-control" value={description} onChange={e => setDescription(e.target.value)} />
-                                    </div>
+                            {/* Mô tả */}
+                            <div className="mb-3">
+                                <label className="form-label">Mô tả</label>
+                                <textarea
+                                    className="form-control"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    rows={3}
+                                    style={{ resize: "vertical" }}
+                                />
+                            </div>
 
-                                    <div className="mb-3">
-                                        <label className="form-label">Giá bán <span className="text-danger">*</span></label>
-                                        <input className="form-control"  value={price} onChange={e => setPrice(Number(e.target.value))} />
-                                    </div>
+                            {/* Giá bán */}
+                            <div className="mb-3">
+                                <label className="form-label">Giá bán (VNĐ)</label>
+                                <input
+                                    className="form-control"
+                                    value={price}
+                                    onChange={(e) => setPrice(e.target.value)}
+                                    placeholder="VD: 45000"
+                                />
+                            </div>
 
-                                    <div className="mb-3">
-                                        <label className="form-label">Link ảnh <span className="text-danger">*</span></label>
-                                        <input className="form-control"  value={imageUrl} onChange={e => setImageUrl(e.target.value)} autoComplete="off" name="new-password" />
-                                    </div>
+                            {/* Link ảnh */}
+                            <div className="mb-3">
+                                <label className="form-label">Link ảnh</label>
+                                <input
+                                    className="form-control"
+                                    value={imageUrl}
+                                    onChange={(e) => setImageUrl(e.target.value)}
+                                    placeholder="https://..."
+                                />
+                            </div>
 
-                                    {/* chọn danh mục cho món ăn */}
-                                     <div className="mb-3">
-                                        <label className="form-label">Thuộc danh mục <span className="text-danger">*</span></label>
-                                        <select className="form-select"  value={categoryId} onChange={(e) => {const val = e.target.value; setCategoryId(Number(val));}} autoComplete="off" name="categoryId">
-                                            <option value=""> --Chọn danh mục--</option>
-                                                {categories.map((c) =>(
-                                                    <option key={c.id} value={c.id}>{c.name} </option>
-                                                ))}
-                                        </select>
-                                    </div>
+                            {/* Danh mục */}
+                            <div className="mb-3">
+                                <label className="form-label">Danh mục</label>
+                                <select
+                                    className="form-select"
+                                    value={categoryId}
+                                    onChange={(e) => setCategoryId(e.target.value)}
+                                >
+                                    <option value="">-- Chọn danh mục --</option>
+                                    {categories.map((c) => (
+                                        <option key={c.id} value={String(c.id)}>
+                                            {c.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                                     <div className="mb-3">
-                                        <label className="form-label">Thời gian  chuẩn bị <span className="text-danger">*</span></label>
-                                        <input className="form-control" value={preparationTime} onChange={e => setPreparationTime(Number(e.target.value))} autoComplete="off" name="new-password" />
-                                    </div>
-                                </>
+                            {/* Thời gian chuẩn bị */}
+                            <div className="mb-3">
+                                <label className="form-label">Thời gian chuẩn bị (phút)</label>
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    value={preparationTime}
+                                    onChange={(e) => setPreparationTime(e.target.value)}
+                                    placeholder="VD: 15"
+                                />
+                            </div>
+
+                            {/* Tình trạng */}
+                            {mode === "edit" && (
+                                <div className="mb-3">
+                                    <label className="form-label">Tình trạng</label>
+                                    <select
+                                        className="form-select"
+                                        value={isAvailable}
+                                        onChange={(e) => setIsAvailable(e.target.value)}
+                                    >
+                                        <option value="">-- Chọn tình trạng --</option>
+                                        <option value="1">Còn hàng</option>
+                                        <option value="0">Hết hàng</option>
+                                    </select>
+                                </div>
                             )}
-
-                            
                         </div>
 
                         <div className="modal-footer">
-                            <button type="button" className="btn btn-outline-secondary" onClick={onClose}>Hủy</button>
+                            <button type="button" className="btn btn-outline-secondary" onClick={onClose}>
+                                Hủy
+                            </button>
                             <button type="submit" className="btn btn-success" disabled={disabled}>
-                                {submitting ? "Đang lưu…" : (mode === "create" ? "Thêm" : "Lưu")}
+                                {submitting ? "Đang lưu…" : mode === "create" ? "Thêm" : "Lưu"}
                             </button>
                         </div>
                     </form>

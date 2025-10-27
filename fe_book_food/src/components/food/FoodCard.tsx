@@ -2,22 +2,21 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../../utils/constants";
-import AddToDraftButton from "./AddToDraftButton";
 
 
 interface FoodCardProps {
   id: number;
   name: string;
   price: number;
-  image: string; // hoặc imageUrl nếu bạn đặt vậy ở BE
+  imageUrl: string; // hoặc imageUrl nếu bạn đặt vậy ở BE
 }
 
-const FoodCard: React.FC<FoodCardProps> = ({ id, name, price, image}) => {
+const FoodCard: React.FC<FoodCardProps> = ({ id, name, price, imageUrl}) => {
   return (
     <div className="card h-100 shadow-sm">
       <Link to={ROUTES.foodDetail(id)}>
         <img
-          src={image}
+          src={imageUrl}
           alt={name}
           className="card-img-top"
           style={{ height: "200px", objectFit: "cover" }}

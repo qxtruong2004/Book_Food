@@ -23,8 +23,8 @@ export default function AdminDashboard() {
         >
             {/* Sidebar */}
             <aside
-                className="bg-success border-end sidebar" // Giữ class "sidebar"
-                style={{ width: 260, backgroundColor: "#e8f5e8" }}
+                className="bg-success border-end sidebar position-sticky top-0"
+        style={{ width: 260, backgroundColor: "#e8f5e8", height: "100vh", overflowY: "auto" }}
             >
                 <div
                     className="p-3 border-bottom"

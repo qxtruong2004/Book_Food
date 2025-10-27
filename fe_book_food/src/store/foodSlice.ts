@@ -11,9 +11,9 @@ import { Page } from "../types/page";
 
 interface FoodState {
     foods: Food[];
-    categoryFoods: Food[];
+    categoryFoods: Page<FoodResponse> | null;
     managerFood: Page<FoodResponse> | null;
-    searchResults: FoodResponse[];
+    searchResults: Page<FoodResponse> | null;
     currentFood: FoodResponse | null;
     loading: boolean;
     error: string | null;
@@ -24,8 +24,8 @@ interface FoodState {
 
 const initialState: FoodState = {
     foods: [],
-    categoryFoods: [],
-    searchResults: [],
+    categoryFoods: null,
+    searchResults: null,
     managerFood: null,
     currentFood: null,
     loading: false,
@@ -53,11 +53,10 @@ export const fetchAllFoodsAsync = createAsyncThunk(
 
 //lấy tất cả món ăn phía admin
 export const fetchAllFoodsByAdminAsync = createAsyncThunk("foods/fetchAllFoodsByAdmin",
-    async ({page = 0, size = 10}: {page?: number, size?: number}, {rejectWithValue}) =>{
-        try{
+    async ({ page = 0, size = 10 }: { page?: number, size?: number }, { rejectWithValue }) => {
+        try {
             const result = await foodService.getAllFoodsByAdmin(page, size);
             if (!result?.content || result.content.length === 0) {
-                console.warn('⚠️ Content rỗng ở page', page);
                 return { ...result, content: [] };  // Giữ Page nhưng empty
             }
             return result;
@@ -101,7 +100,7 @@ export const fetchFoodByIdAsync = createAsyncThunk(
 
 // Tìm kiếm món ăn
 export const searchFoodsAsync = createAsyncThunk<
-    FoodResponse[],                // payload type khi fulfilled
+    Page<FoodResponse> | null,                // payload type khi fulfilled
     FoodSearchParams,              // tham số đầu vào
     { rejectValue: string }        // type khi reject
 >(
@@ -109,8 +108,8 @@ export const searchFoodsAsync = createAsyncThunk<
     async (params, { rejectWithValue }) => {
         try {
             const results = await foodService.searchFoods(params);
-            // ✅ coi null/undefined là không có kết quả -> mảng rỗng
-            return results ?? [];
+            // ✅ coi null/undefined là; không có kết quả -> mảng rỗng
+            return results ?? null;
         } catch (error: any) {
             return rejectWithValue(error?.message || "Failed to search foods");
         }
@@ -178,7 +177,7 @@ const foodSlice = createSlice({
             state.currentFood = null;
         },
         clearSearchResults: (state) => {
-            state.searchResults = [];
+            state.searchResults = null;
         },
     },
     extraReducers: (builder) => {
@@ -230,7 +229,7 @@ const foodSlice = createSlice({
             })
             .addCase(searchFoodsAsync.fulfilled, (state, action) => {
                 state.loading = false;
-                state.searchResults = action.payload; // có thể là []
+                state.managerFood = action.payload; // có thể là []
             })
             .addCase(searchFoodsAsync.rejected, (state, action) => {
                 state.loading = false;
@@ -288,7 +287,10 @@ const foodSlice = createSlice({
             .addCase(deleteFoodAsync.fulfilled, (state, action) => {
                 state.deleteLoading = false;
                 state.foods = state.foods.filter((f) => f.id !== action.payload);
-                state.categoryFoods = state.categoryFoods.filter((f) => f.id !== action.payload);
+                if (!state.categoryFoods) return;
+
+                const idToRemove = action.payload;
+                state.categoryFoods.content = state.categoryFoods.content?.filter((f) => f.id !== idToRemove) ?? [];
                 if (state.currentFood?.id === action.payload) {
                     state.currentFood = null;
                 }

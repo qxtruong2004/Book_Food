@@ -9,8 +9,9 @@ const FoodPage: React.FC = () => {
     foods,
     loading,
     error,
-    fetchAllFoods,
+    fetchAllFoodsAdmin,
     searchResults,
+    managerFood,
     clearFoodSearchResults,
     searchFoods,
   } = useFood();
@@ -27,7 +28,7 @@ const FoodPage: React.FC = () => {
       searchFoods({ keyword: kw, page: 0, size: 12 });
     } else {
       setHasFilter(false);
-      fetchAllFoods();
+      fetchAllFoodsAdmin();
       clearFoodSearchResults();
     }
 
@@ -37,15 +38,15 @@ const FoodPage: React.FC = () => {
 
   // Nếu searchResults khác shape với FoodList, map về {id,name,price,image}
   const adaptedResults = useMemo(
-    () =>
-      (searchResults || []).map((f) => ({
-        id: f.id,
-        name: f.name,
-        price: f.price,
-        image: f.imageUrl,
-      })),
-    [searchResults]
-  );
+  () =>
+    managerFood?.content?.map((f) => ({  // THÊM: .content trước .map()
+      id: f.id,
+      name: f.name,
+      price: f.price,
+      image: f.imageUrl,  // Hoặc f.image nếu field khác
+    })) || [],  // Fallback: [] nếu null/undefined
+  [managerFood]  // Dependency đúng
+);
 
   if (loading) return <p>Đang tải món ăn...</p>;
   if (error) return <p className="text-danger">{error}</p>;
@@ -55,7 +56,7 @@ const FoodPage: React.FC = () => {
   return (
     <div className="container mt-4">
       <h2 className="mb-4">Thực đơn</h2>
-      <FoodList foods={list} />
+      <FoodList foods={managerFood} />
       {list.length === 0 && <p className="text-muted">Không có món ăn nào.</p>}
     </div>
   );

@@ -15,41 +15,71 @@ interface FoodDetailsProps {
   categoryName: string;
   soldCount: number;
 }
+
 const FoodDetails: React.FC<FoodDetailsProps> = ({
   id, name, description, price, imageUrl, isAvailable, preparationTime, rating, categoryName, soldCount
 }) => {
   return (
     <div className="card shadow p-4">
-      <img
-        src={imageUrl}
-        alt={name}
-        className="card-img-top mb-3"
-        style={{ maxHeight: "300px", objectFit: "cover" }}
-      />
-      <h2>{name}</h2>
-      <p className="text-muted">{description}</p>
-      <h4 className="text-danger fw-bold">{formatCurrency(price)} đ</h4>
-
-      <ul className="list-unstyled mt-3">
-        <li><strong>Danh mục:</strong> {categoryName}</li>
-        <li><strong>Thời gian chế biến:</strong> {preparationTime} phút</li>
-        <li>
-          <strong>Tình trạng:</strong>{" "}
-          {isAvailable ? <span className="text-success">Còn hàng</span> : <span className="text-danger">Hết hàng</span>}
-        </li>
-        <li><strong>Đã bán: </strong>{formatSoldCount(soldCount)}</li>
-        <li><strong>Đánh giá:</strong> ⭐ {rating.toFixed(1)}/5</li>
-      </ul>
-
-      {/* ✅ Nút thêm vào đơn */}
-      {isAvailable ? (
-         <div className="mt-3">
-          {/* ✅ Truyền tên và giá để lưu vào draft */}
-          <AddToDraftButton foodId={id} foodName={name} price={price} />
+      <div className="row g-4 align-items-start">
+        {/* LEFT: Ảnh (1/2 màn hình) */}
+        <div className="col-12 col-md-6">
+          <div className="border rounded overflow-hidden h-100">
+            <img
+              src={imageUrl}
+              alt={name}
+              className="img-fluid w-100"
+              style={{
+                objectFit: "cover",
+                aspectRatio: "1 / 1",     // vuông đẹp; trên trình duyệt cũ vẫn ok vì có height auto
+                maxHeight: 520
+              }}
+            />
+          </div>
         </div>
-      ) : (
-        <button className="btn btn-secondary mt-3" disabled>Hết hàng</button>
-      )}
+
+        {/* RIGHT: Thông tin (1/2 màn hình) */}
+        <div className="col-12 col-md-6">
+          <h2 className="mb-2">{name}</h2>
+
+          <div className="mb-3">
+            <span className="fs-4 text-danger fw-bold">
+              {formatCurrency(price)}
+            </span>
+          </div>
+
+          <p className="text-muted">{description}</p>
+
+          <ul className="list-unstyled mt-3 small">
+            <li className="mb-1">
+              <strong>Danh mục:</strong> <span className="badge text-bg-secondary">{categoryName}</span>
+            </li>
+            <li className="mb-1">
+              <strong>Tình trạng: </strong>
+              {isAvailable
+                ? <span className="badge text-bg-success">Còn hàng</span>
+                : <span className="badge text-bg-danger">Hết hàng</span>}
+            </li>
+            <li className="mb-1">
+              <strong>Thời gian chế biến:</strong> {preparationTime} phút
+            </li>
+            <li className="mb-1">
+              <strong>Đã bán:</strong> {formatSoldCount(soldCount)}
+            </li>
+            <li className="mb-1">
+              <strong>Đánh giá:</strong> ⭐ {rating.toFixed(1)}/5
+            </li>
+          </ul>
+
+          {isAvailable ? (
+            <div className="mt-3">
+              <AddToDraftButton foodId={id} foodName={name} price={price} />
+            </div>
+          ) : (
+            <button className="btn btn-secondary mt-3" disabled>Hết hàng</button>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

@@ -33,6 +33,7 @@ export interface FoodSearchParams{
     maxPrice?: number;
     page?: number;
     size?: number;
+    isAvailable?: boolean;
 }
 
 // DTO trả về từ backend

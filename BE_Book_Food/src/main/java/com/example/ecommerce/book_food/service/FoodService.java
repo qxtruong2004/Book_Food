@@ -34,7 +34,7 @@ public class FoodService {
     // lay het do an
     public Page<FoodResponse> getAllFoods(int page, int size){
         Pageable pageable = PageRequest.of(page, size);
-        Page<Food> foods = foodRepository.findByIsAvailableTrueOrderByCreatedAtDesc(pageable);
+        Page<Food> foods = foodRepository.findAllByOrderByCreatedAtDesc(pageable);
         return foods.map(foodMapper::toResponse);
     }
 
@@ -46,7 +46,7 @@ public class FoodService {
     }
 
     //lay danh sach mon an theo category
-    public List<FoodResponse> getFoodsByCategory(Long categoryId, int page, int size) {
+    public Page<FoodResponse> getFoodsByCategory(Long categoryId, int page, int size) {
         // Kiểm tra category có tồn tại không
         boolean exists = categoryRepository.existsById(categoryId);
         if (!exists) {
@@ -54,8 +54,8 @@ public class FoodService {
         }
 
         Pageable pageable = PageRequest.of(page, size);
-        List<Food> foods = foodRepository.findByCategoryIdAndIsAvailableTrue(categoryId, pageable);
-        return foodMapper.toResponseList(foods);
+        Page<Food> foods = foodRepository.findByCategoryId(categoryId, pageable);
+        return foods.map(foodMapper::toResponse);
     }
 
     //tạo món ăn mới
@@ -79,23 +79,40 @@ public class FoodService {
     }
 
     //tìm kiếm món ăn
-    public List<FoodResponse> searchFoods(String keyword, Long categoryId,
-                                          BigDecimal minPrice, BigDecimal maxPrice,
+    public Page<FoodResponse> searchFoods(String keyword, Long categoryId,
+                                          BigDecimal minPrice, BigDecimal maxPrice, Boolean trangthai,
                                           int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         //nếu dùng keyword tìm kiếm
         if (keyword != null && !keyword.trim().isEmpty()) {
-            List<Food> foods = foodRepository.findByNameContainingIgnoreCaseAndIsAvailableTrue(keyword, pageable);
-            if(foods.isEmpty()){
+            Page<Food> foods;
+            if (trangthai != null) {  // Kết hợp keyword + trạng thái
+                foods = foodRepository.findByNameContainingAndAvailable(keyword, trangthai, pageable);
+            } else {
+                foods = foodRepository.findByNameContainingIgnoreCase(keyword, pageable);
+            }
+            if (foods.isEmpty()) {
                 throw new FoodNotFoundException("Food not found with name: " + keyword);
             }
-            return foodMapper.toResponseList(foods);
+            return foods.map(foodMapper::toResponse);
+        }
+
+        //lọc theo trạng thái
+        // Nếu có trạng thái (không keyword)
+        if (trangthai != null) {
+            if (trangthai) {
+                return foodRepository.findByIsAvailableIsTrueOrderByCreatedAtDesc(pageable)
+                        .map(foodMapper::toResponse);
+            } else {
+                return foodRepository.findByIsAvailableIsFalseOrderByCreatedAtDesc(pageable)
+                        .map(foodMapper::toResponse);
+            }
         }
 
         //nếu không có kw thì lọc theo category và khoảng giá
-        List<Food> foods = foodRepository.findFoodsWithFilters(categoryId, minPrice, maxPrice, pageable);
-        return foodMapper.toResponseList(foods);
+        Page<Food> foods = foodRepository.findFoodsWithFilters(categoryId, minPrice, maxPrice, pageable);
+        return foods.map(foodMapper::toResponse);
     }
 
     // update món ăn

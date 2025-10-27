@@ -33,12 +33,12 @@ public class FoodController {
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<ApiResponse<List<FoodResponse>>> getFoodsByCategory(
+    public ResponseEntity<ApiResponse<Page<FoodResponse>>> getFoodsByCategory(
             @PathVariable Long categoryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        List<FoodResponse> listFoods = foodService.getFoodsByCategory(categoryId, page, size);
+        Page<FoodResponse> listFoods = foodService.getFoodsByCategory(categoryId, page, size);
         return ResponseEntity.ok(ApiResponse.success(listFoods));
     }
 
@@ -49,15 +49,16 @@ public class FoodController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<FoodResponse>>> searchFoods(
+    public ResponseEntity<ApiResponse<Page<FoodResponse>>> searchFoods(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) Boolean isAvailable,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        List<FoodResponse> listFoods = foodService.searchFoods(keyword, categoryId, minPrice, maxPrice, page, size);
+        Page<FoodResponse> listFoods = foodService.searchFoods(keyword, categoryId, minPrice, maxPrice,isAvailable, page, size);
         return ResponseEntity.ok(ApiResponse.success(listFoods));
     }
 

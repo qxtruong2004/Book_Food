@@ -38,7 +38,7 @@ const AdminCategoryPage: React.FC = () => {
   //chế độ của form
   const [mode, setMode] = useState<"create" | "edit">("create");
 
-  useEffect(() => { 
+  useEffect(() => {
     getAllCategories();
     countCategories();
   }, [getAllCategories, total, countCategories]);
@@ -51,15 +51,15 @@ const AdminCategoryPage: React.FC = () => {
   }, [keyword, searchCategories]);
 
   // CategoryPage.tsx
-const onSearch = useCallback(async (kw: string) => {
-  setSelectedId(null);
+  const onSearch = useCallback(async (kw: string) => {
+    setSelectedId(null);
 
-  if (kw.trim()) {
-    await searchCategories(kw.trim());
-  } else {
-    await getAllCategories();
-  }
-}, [searchCategories, getAllCategories]);
+    if (kw.trim()) {
+      await searchCategories(kw.trim());
+    } else {
+      await getAllCategories();
+    }
+  }, [searchCategories, getAllCategories]);
 
 
 
@@ -104,7 +104,7 @@ const onSearch = useCallback(async (kw: string) => {
               onSearch={onSearch}
               onClear={onClear}
               debounceMs={500}      //auto search sau 500ms nên kh cần show button
-              showButtons={false} 
+              showButtons={false}
             />
           </div>
           <h5>Tổng số lượng danh mục: {total}</h5>
