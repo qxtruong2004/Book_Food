@@ -67,6 +67,7 @@ export const API_ENDPOINTS = {
 
         MY_ORDERS: `/orders/my_orders`, // page, size gửi bằng params
         MY_ORDER_DETAIL: (orderId: number) => `/orders/my_orders/${orderId}`,
+        STATISTICS_BY_DAYS: (startDate: string, endDate: string) => `/orders/by_day?startDate=${startDate}&endDate=${endDate}`
     },
     REVIEWS: {
         BASE: "/reviews",

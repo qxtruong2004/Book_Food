@@ -48,6 +48,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     BigDecimal getTotalRevenueByDateRange(@Param("startDateTime") LocalDateTime startDateTime,
                                           @Param("endDateTime") LocalDateTime endDateTime);
 
+    //lấy ds đơn hàng trong 1 ngày
+    @Query("select o FROM Order o  WHERE o.createdAt  >= :startOfDay AND   o.createdAt <= :endOfDay order by o.createdAt desc ")
+    Page<Order> getOrdersOnDay(@Param("startOfDay") LocalDateTime createDateTime,
+                               @Param("endOfDay") LocalDateTime endOfDay, Pageable pageable);
+
+
     //lấy số đơn hàng của 1 user
     long countByUser_Username(String username);
 }

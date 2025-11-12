@@ -214,6 +214,7 @@ const AdminFoodPage: React.FC = () => {
                   totalElements={managerFood.totalElements}
                   onChangePage={handleChangePage}
                   onChangeSize={handleChangeSize}
+                  tieude="món"
                 />
               </div>
             </div>

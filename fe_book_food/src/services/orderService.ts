@@ -1,16 +1,17 @@
-import { CreateOrderRequest, OrderResponse, OrderStatus, UserOrderResponse } from "../types/order";
+import { CreateOrderRequest, OrderResponse, OrderStatus, StatisticsOrders, UserOrderResponse } from "../types/order";
+import { Page } from "../types/page";
 import { API_ENDPOINTS } from "../utils/constants";
 import { api, ApiResponse } from "./api";
 
 export const orderService = {
     // Lấy tất cả đơn hàng (ADMIN) + có thể lọc trạng thái + phân trang
-    async getOrders(orderStatus?: OrderStatus,page = 0,size = 10): Promise<OrderResponse[] | null> {
+    async getOrders(orderStatus?: OrderStatus,page = 0,size = 10): Promise<Page<OrderResponse> | null> {
         try {
            const params: any = {};
             if (page !== undefined) params.page = page;
             if (size !== undefined) params.size = size;
             if (orderStatus) params.orderStatus = orderStatus;
-            const response = await api.get<ApiResponse<OrderResponse[]>>(API_ENDPOINTS.ORDERS.GET_ALL,{ params }
+            const response = await api.get<ApiResponse<Page<OrderResponse>>>(API_ENDPOINTS.ORDERS.GET_ALL,{ params }
     );
             return response.data.data;
         } catch (error) {
@@ -19,19 +20,6 @@ export const orderService = {
         }
     },
 
-    // Lấy danh sách order của user (ADMIN)
-    async getOrdersByUser(userId: number, page = 0, size = 10): Promise<UserOrderResponse | null> {
-        try {
-            const response = await api.get<ApiResponse<UserOrderResponse>>(
-                API_ENDPOINTS.ORDERS.BY_USER(userId),
-                { params: { page, size } }
-            );
-            return response.data.data;
-        } catch (error) {
-            console.error("OrderService error (getOrdersByUser):", error);
-            return null;
-        }
-    },
 
     // Tạo order (ADMIN / USER) (id chỉ có admin dùng)
     async createOrder(createOrderRequest: CreateOrderRequest, userId?: number): Promise<OrderResponse | null> {
@@ -124,4 +112,31 @@ export const orderService = {
             return null;
         }
     },
+
+    // Lấy danh sách order của user (ADMIN)
+    async getOrdersByUser(userId: number, page = 0, size = 10): Promise<UserOrderResponse | null> {
+        try {
+            const response = await api.get<ApiResponse<UserOrderResponse>>(
+                API_ENDPOINTS.ORDERS.BY_USER(userId),
+                { params: { page, size } }
+            );
+            return response.data.data;
+        } catch (error) {
+            console.error("OrderService error (getOrdersByUser):", error);
+            return null;
+        }
+    },
+
+    //thống kê số lượng đơn hàng theo ngày
+    async getOrdersByDays(statistics: StatisticsOrders, page = 0, size = 10): Promise<Page<OrderResponse> | null>{
+        try{
+            const response = await api.get<ApiResponse<Page<OrderResponse>>>(
+                API_ENDPOINTS.ORDERS.STATISTICS_BY_DAYS(statistics.startDate, statistics.endDate));
+                return response.data.data;
+        } catch (error) {
+            console.error("OrderService error (getOrders):", error);
+            return null;
+        }
+
+    }
 }

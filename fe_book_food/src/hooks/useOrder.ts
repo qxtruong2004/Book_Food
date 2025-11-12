@@ -8,6 +8,7 @@ import {
   fetchMyOrdersAsync,
   fetchOrderByIdAsync,
   fetchMyOrderAsync,
+  fetchOrdersByDaysAsync,
   createOrderAsync,
   cancelOrderAsync,
   updateOrderStatusAsync,
@@ -15,7 +16,7 @@ import {
   clearError,
   clearCurrentOrder,
 } from "../store/orderSlice";
-import { CreateOrderRequest, OrderStatus } from "../types/order";
+import { CreateOrderRequest, OrderStatus, StatisticsOrders } from "../types/order";
 
 export const useOrder = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -156,6 +157,19 @@ export const useOrder = () => {
     [dispatch]
   );
 
+  //fetch orders by days
+   const fetchOrdersByDays = useCallback(
+    async (params: StatisticsOrders) => {
+      try {
+        return await dispatch(fetchOrdersByDaysAsync( params)).unwrap();
+      } catch (err: any) {
+        toast.error(err || "Failed to fetch orders");
+        throw err;
+      }
+    },
+    [dispatch]
+  );
+
   // Clear error
   const clearOrderError = useCallback(() => {
     dispatch(clearError());
@@ -187,6 +201,7 @@ export const useOrder = () => {
     fetchMyOrder,
     createOrder,
     cancelOrder,
+    fetchOrdersByDays,
     updateOrderStatus,
     fetchTotalRevenue,
     clearOrderError,

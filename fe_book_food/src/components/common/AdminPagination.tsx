@@ -1,3 +1,4 @@
+
 import { useMemo } from "react";
 
 interface Props{
@@ -7,6 +8,7 @@ interface Props{
     totalElements: number;
     onChangePage: (nextPage: number) => void;
     onChangeSize?: (nextSize: number) => void;
+    tieude: string;
 }
 
 function buildPageList(cur: number, total: number){
@@ -33,7 +35,7 @@ function buildPageList(cur: number, total: number){
 }
 
 const AdminPagination: React.FC<Props> = ({
-  page, size, totalPages, totalElements,
+  page, size, totalPages, totalElements,tieude,
   onChangePage, onChangeSize
 }) => {
   const pages = useMemo(() => buildPageList(page, totalPages), [page, totalPages]);
@@ -43,7 +45,7 @@ const AdminPagination: React.FC<Props> = ({
   return (
     <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
       <div className="text-muted small">
-        Tổng: <strong>{totalElements.toLocaleString()}</strong> món • Trang{" "}
+        Tổng: <strong>{totalElements.toLocaleString()}</strong> {tieude} • Trang{" "}
         <strong>{totalPages === 0 ? 0 : page + 1}</strong>/<strong>{totalPages}</strong>
       </div>
 

@@ -6,14 +6,17 @@ import {
     CreateOrderRequest,
     OrderStatus,
     UpdateOrderStatusRequest,
+    StatisticsOrders
 } from "../types/order";
+import { Page } from "../types/page";
 
 interface OrderState {
-    orders: OrderResponse[];              // danh sách order (admin)
+    orders: Page<OrderResponse> | null;              // danh sách order (admin)
     userOrders: UserOrderResponse | null; // danh sách order theo user
     myOrders: UserOrderResponse | null;   // đơn hàng của bản thân
     currentOrder: OrderResponse | null;   // chi tiết 1 đơn hàng
     totalRevenue: number | null;
+    newOrder: OrderResponse[];
     loading: boolean;
     error: string | null;
     createLoading: boolean;
@@ -22,11 +25,12 @@ interface OrderState {
 }
 
 const initialState: OrderState = {
-    orders: [],
+    orders: null,
     userOrders: null,
     myOrders: null,
     currentOrder: null,
     totalRevenue: null,
+    newOrder: [],
     loading: false,
     error: null,
     createLoading: false,
@@ -44,9 +48,9 @@ export const fetchOrdersAsync = createAsyncThunk(
         { rejectWithValue }
     ) => {
         try {
-            const orders = await orderService.getOrders(status, page, size);
-            if (!orders) throw new Error("No orders found");
-            return orders;
+            const results = await orderService.getOrders(status, page, size);
+            if (!results) throw new Error("No orders found");
+            return results;
         } catch (error: any) {
             return rejectWithValue(error.message || "Failed to fetch orders");
         }
@@ -114,9 +118,9 @@ export const createOrderAsync = createAsyncThunk(
     "order/createOrder",
     async ({ request, userId }: { request: CreateOrderRequest; userId?: number }, { rejectWithValue }) => {
         try {
-            const order = await orderService.createOrder(request, userId);
-            if (!order) throw new Error("Failed to create order");
-            return order;
+            const result = await orderService.createOrder(request, userId);
+            if (!result) throw new Error("Failed to create order");
+            return result;
         } catch (error: any) {
             return rejectWithValue(error.message || "Failed to create order");
         }
@@ -164,6 +168,19 @@ export const fetchTotalRevenueAsync = createAsyncThunk(
         }
     }
 );
+
+//thống kê số lượng đơn hàng theo ngày
+export const fetchOrdersByDaysAsync = createAsyncThunk("order/fetchOrdersByDays",
+    async(params : StatisticsOrders, { rejectWithValue }) =>{
+        try{
+            const order = await orderService.getOrdersByDays(params);
+            if (!order) throw new Error("No orders found");
+            return order;
+        }catch (error: any) {
+            return rejectWithValue(error.message || "Failed to fetch orders");
+        }
+    }
+)
 
 // --- Slice ---
 const orderSlice = createSlice({
@@ -219,7 +236,7 @@ const orderSlice = createSlice({
             })
             .addCase(createOrderAsync.fulfilled, (state, action) => {
                 state.createLoading = false;
-                state.orders.unshift(action.payload);
+                state.newOrder.unshift(action.payload);
             })
             .addCase(createOrderAsync.rejected, (state, action) => {
                 state.createLoading = false;
@@ -233,7 +250,22 @@ const orderSlice = createSlice({
             })
             .addCase(cancelOrderAsync.fulfilled, (state, action) => {
                 state.cancelLoading = false;
-                state.orders = state.orders.filter((o) => o.id !== action.payload);
+                // Nếu orders tồn tại và có content
+                if (state.orders && Array.isArray(state.orders.content)) {
+                    // Lọc bỏ order bị hủy trong content
+                    const newContent = state.orders.content.filter(
+                        (o) => o.id !== action.payload
+                    );
+
+                    // Cập nhật lại state.orders (giữ nguyên thông tin phân trang)
+                    state.orders = {
+                        ...state.orders,
+                        content: newContent,
+                        totalElements: state.orders.totalElements - 1, // giảm tổng số phần tử
+                    };
+                }
+
+                // Xóa currentOrder nếu chính order đó bị hủy
                 if (state.currentOrder?.id === action.payload) {
                     state.currentOrder = null;
                 }
@@ -250,8 +282,14 @@ const orderSlice = createSlice({
             })
             .addCase(updateOrderStatusAsync.fulfilled, (state, action) => {
                 state.updateLoading = false;
-                const idx = state.orders.findIndex((o) => o.id === action.payload.id);
-                if (idx !== -1) state.orders[idx] = action.payload;
+                if (state.orders?.content) {
+                    const idx = state.orders.content.findIndex(o => o.id === action.payload.id);
+                    if (idx !== -1) {
+                        // Immer cho phép gán trực tiếp
+                        state.orders.content[idx] = action.payload;
+                    }
+                }
+
                 if (state.currentOrder?.id === action.payload.id) {
                     state.currentOrder = action.payload;
                 }
@@ -265,6 +303,21 @@ const orderSlice = createSlice({
         builder.addCase(fetchTotalRevenueAsync.fulfilled, (state, action) => {
             state.totalRevenue = action.payload;
         });
+
+        //statistics by days
+        // Fetch all orders
+        builder
+            .addCase(fetchOrdersByDaysAsync.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(fetchOrdersByDaysAsync.fulfilled, (state, action) => {
+                state.loading = false;
+                state.orders = action.payload;
+            })
+            .addCase(fetchOrdersByDaysAsync.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            });
     },
 });
 

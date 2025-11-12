@@ -27,16 +27,15 @@ import { OrderDraftProvider } from './context/OrderDraftContext';
 import { useAuth } from './hooks/useAuth';
 import { JSX } from 'react/jsx-runtime';
 import FoodDetailsPage from './pages/FoodDetailsPage ';
-import MyReviewList from './components/review/MyReviewList';
 import ProtectedRouter from './components/auth/ProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboardPage';
 import Dashboard from './components/admin/Dashboard';
-import AdminOrders from './pages/admin/AdminOrders';
+
 import AdminRedirectOnHome from './components/auth/AdminRedirectOnHome';
-import AdminCategory from './pages/admin/AdminCategoryPage';
 import AdminCategoryPage from './pages/admin/AdminCategoryPage';
 import AdminUserPage from './pages/admin/AdminUserPage';
 import AdminFoodPage from './pages/admin/AdminFoodPage';
+import AdminOrderPage from './pages/admin/AdminOrderPage';
 
 
 const BuggyComponent = () => {
@@ -97,7 +96,7 @@ function App() {
             >
               <Route index element={<Dashboard />} />
               <Route path="foods" element={<AdminFoodPage />} />
-              <Route path="orders" element={<AdminOrders />} />
+              <Route path="orders" element={<AdminOrderPage />} />
               <Route path="categories" element={<AdminCategoryPage />} />
               <Route path="users" element={<AdminUserPage />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />

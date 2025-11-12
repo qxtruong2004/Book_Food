@@ -111,7 +111,7 @@ public class OrderService {
         // đếm tong so đơn hàng của user
         long totalOrderByUser = orderRepository.countByUserId(userId);
         // Chuyển đổi danh sách đơn hàng thành OrderResponse
-        List<OrderResponse> orderResponses = orderMapper.convertToOrderResponseList(orders.getContent());
+        Page<OrderResponse> orderResponses = orders.map(orderMapper::convertToOrderResponse);
 
         // Tạo phản hồi
         return new UserOrderResponse(
@@ -127,9 +127,9 @@ public class OrderService {
 
         //đếm tổng sl đơn hàng
         long totalOrders = orderRepository.countByUser_Username(username);
-        List<OrderResponse> orderResponses = orderMapper.convertToOrderResponseList(myOrders.getContent());
+        Page<OrderResponse> orderResponsesPage = myOrders.map(orderMapper::convertToOrderResponse);
 
-        return new UserOrderResponse(orderResponses, totalOrders);
+        return new UserOrderResponse(orderResponsesPage, totalOrders);
     }
 
     //cập nhật trạng thái order
@@ -224,8 +224,8 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    //lấy danh sách order ( lọc theo trạng thái)
-    public List<OrderResponse> getAllOrders(OrderStatus orderStatus, int page, int size) {
+    //lấy danh sách order ( lọc theo trạng thái, nếu kh có trạng thái thì lấy tất cả )
+    public Page<OrderResponse> getAllOrders(OrderStatus orderStatus, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Order> orders;
         if(orderStatus != null) {
@@ -234,6 +234,17 @@ public class OrderService {
         else{
             orders = orderRepository.findAll(pageable);
         }
-        return orderMapper.convertToOrderResponseList(orders.getContent());
+        return orders.map(orderMapper::convertToOrderResponse);
+    }
+
+    //lấy số lượng đơn hang theo ngay
+    public Page<OrderResponse> getOrdersByDay(LocalDate startdate, LocalDate enddate , int page, int size) {
+        LocalDateTime start =  startdate.atStartOfDay();
+        LocalDateTime end = enddate.atTime(LocalTime.MAX);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Order> orders;
+        orders = orderRepository.getOrdersOnDay(start, end, pageable);
+        return orders.map(orderMapper::convertToOrderResponse);
+
     }
 }

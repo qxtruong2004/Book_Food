@@ -13,6 +13,9 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
   SUCCEEDED: "Hoàn tất",
   FAILED: "Đã hủy",
 };
+export type StatusOrderKey = "Tất cả" | keyof typeof OrderStatus;
+
+
 export interface OrderItemResponse{
     foodId: number;
     foodName: string;
@@ -65,3 +68,8 @@ export type DraftItem = {
   foodName?: string;
   price?: number;       // optional, nếu lúc thêm vào có sẵn giá
 };
+
+export interface StatisticsOrders{
+  startDate: string;
+  endDate: string;
+}

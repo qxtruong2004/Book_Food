@@ -35,12 +35,12 @@ public class OrderController {
     //lấy tất cả order ( có thể lọc trạng thái)
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<ApiResponse<List<OrderResponse>>> getOrders(
+    public ResponseEntity<ApiResponse<Page<OrderResponse>>> getOrders(
             @RequestParam(required = false) OrderStatus orderStatus,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        List<OrderResponse> orders = orderService.getAllOrders(orderStatus, page, size);
+        Page<OrderResponse> orders = orderService.getAllOrders(orderStatus, page, size);
         return ResponseEntity.ok(ApiResponse.success(orders));
     }
 
@@ -135,6 +135,18 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success(orderResponse));
     }
 
+    //lay số lượng đơn hàng theo ngày
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/by_day")
+    public ResponseEntity<ApiResponse<Page<OrderResponse>>> getOrdersByDay
+    ( @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue ="10") int size)
+    {
+        Page<OrderResponse> orders = orderService.getOrdersByDay(startDate, endDate, page, size);
+        return ResponseEntity.ok(ApiResponse.success(orders));
+    }
 
 
 }
