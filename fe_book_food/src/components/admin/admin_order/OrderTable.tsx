@@ -7,9 +7,10 @@ interface Props {
     data: OrderResponse[];
     selectedId: number | null;
     onSelect: (id: number) => void;
+    onOpenDetail?: (id: number) => void; 
 }
 
-const OrderTable: React.FC<Props> = ({ data, selectedId, onSelect }) => {
+const OrderTable: React.FC<Props> = ({ data, selectedId, onSelect , onOpenDetail}) => {
     return (
         <div className="border rounded-3 bg-white shadow-sm" style={{ minHeight: 320, overflow: "hidden" }}>
             <div className="table-responsive">
@@ -61,6 +62,7 @@ const OrderTable: React.FC<Props> = ({ data, selectedId, onSelect }) => {
                                         className={isActive ? "table-success" : ""}
                                         style={{height: "60px", verticalAlign: "middle",  cursor: "pointer" }}
                                         onClick={() => onSelect(f.id)}
+                                        onDoubleClick={() => onOpenDetail?.(f.id)}
                                     >
                                         <td className="fw-semibold">#{f.id}</td>
 

@@ -5,15 +5,12 @@ import { Link } from "react-router-dom";
 import { ROUTES } from "../utils/constants";
 
 export default function OrdersPage() {
-  const { fetchMyOrders, loading } = useOrder();
+  const { myOrders, fetchMyOrders, loading } = useOrder();
   const [orders, setOrders] = useState<OrderResponse[]>([]);
 
   //lấy tất cả order của user
   useEffect(() => {
-    (async () => {
-      const data = await fetchMyOrders(); // trả UserOrderResponse
-      setOrders(data.orders);
-    })();
+    fetchMyOrders(0, 10);
   }, [fetchMyOrders]);
 
   if (loading) return <div className="container py-4">Đang tải...</div>;
@@ -22,7 +19,7 @@ export default function OrdersPage() {
     <div className="container py-4">
       <h3>Đơn hàng của tôi</h3>
       <div className="mt-3">
-        {orders.length === 0 ? (
+        {(myOrders?.orders?.content ?? []).length === 0 ? (
           <p>Chưa có đơn hàng.</p>
         ) : (
           <div className="table-responsive">
@@ -37,7 +34,7 @@ export default function OrdersPage() {
                 </tr>
               </thead>
               <tbody>
-                {orders.map(o => (
+                {myOrders?.orders.content.map(o => (
                   <tr key={o.id}>
                     <td>{o.orderNumber}</td>
                     <td>{new Date(o.createdAt).toLocaleString("vi-VN")}</td>

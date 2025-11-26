@@ -4,6 +4,9 @@ import { useOrder } from "../../hooks/useOrder"
 import { OrderResponse, OrderStatus, StatusOrderKey } from "../../types/order";
 import AdminPagination from "../../components/common/AdminPagination";
 import OrderStatusBadge from "../../components/common/OrderStatusBadge";
+// import OrderDetailModal from "../../components/admin/admin_order/OrderDetailModal";
+import { id } from "zod/v4/locales";
+import OrderDetailModal from "../../components/admin/admin_order/OrderDetailModal";
 
 
 const AdminOrderPage: React.FC = () => {
@@ -11,6 +14,7 @@ const AdminOrderPage: React.FC = () => {
 
   //chọn dòng
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<string>("");
 
   //phân trang
   const [page, setPage] = useState(0);
@@ -22,7 +26,7 @@ const AdminOrderPage: React.FC = () => {
 
   //thống kê theo ngày
   const [startDate, setStartDate] = useState<string>("");
-const [endDate, setEndDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
 
   //bản ghi đang chọn
   const selected: OrderResponse | null = useMemo(() => {
@@ -50,6 +54,10 @@ const [endDate, setEndDate] = useState<string>("");
     await fetchOrders(undefined, next, size);
   }
 
+  const [showDetail, setShowDetail] = useState(false);
+
+
+
   //nạp danh sách ban đầu
   useEffect(() => {
     fetchOrders(undefined, 0, 10);
@@ -69,11 +77,11 @@ const [endDate, setEndDate] = useState<string>("");
           {/* các ô lọc, thống kê */}
           <div className="d-flex flex-wrap gap-2 mb-3 align-items-center">
             {/* Filter tình trạng giữ nguyên */}
-            <div className="d-flex align-items-center ms-2">
-              <label className="me-2 mb-0">Trạng thái đơn hàng: </label>
+            <div className="d-flex align-items-center ms-2 ">
+              <label className="form-label mb-0 fw-medium text-muted align-self-center" style={{ whiteSpace: 'nowrap' }}>Trạng thái đơn hàng: </label>
               <select
                 className="form-select"
-                style={{ maxWidth: 220 }}
+                style={{ maxWidth: 220, marginLeft: 10, marginRight: 10 }}
                 value={statusFilter}
                 onChange={handleStatusOrderChange}>
                 <option value="Tất cả">Tất cả</option>
@@ -82,7 +90,7 @@ const [endDate, setEndDate] = useState<string>("");
                 <option value="SUCCEEDED">Hoàn thành</option>
                 <option value="FAILED">Đã hủy</option>
               </select>
-              <label className="me-2 mb-0">Thống kê: </label>
+              <label className="me-2 mb-0" style={{ whiteSpace: 'nowrap' }}>Thống kê: </label>
               <input
                 type="date"
                 className="form-control"
@@ -91,7 +99,7 @@ const [endDate, setEndDate] = useState<string>("");
                 onChange={(e) => setStartDate(e.target.value)}
                 placeholder="Từ ngày"
               />
-              <span className="text-muted">—</span>
+              <span className="text-muted" style={{ marginLeft: 10, marginRight: 10 }}>-</span>
               <input
                 type="date"
                 className="form-control"
@@ -105,47 +113,65 @@ const [endDate, setEndDate] = useState<string>("");
                 className="btn btn-primary"
                 onClick={() => {
                   setPage(0);
-                  fetchOrdersByDays({startDate, endDate} );
+                  fetchOrdersByDays({ startDate, endDate });
                 }}
+                style={{ marginLeft: 10, marginRight: 10 }}
               >
-              Lọc
-            </button>
+                Lọc
+              </button>
 
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => {
+                  setStartDate("");
+                  setEndDate("");
+                  setPage(0);
+                  fetchOrders(undefined, 0, 10);
+                }}
+                style={{ whiteSpace: 'nowrap' }}
+              >
+                Xóa lọc
+              </button>
+            </div>
             <button
-              className="btn btn-outline-secondary"
-              onClick={() => {
-                setStartDate("");
-                setEndDate("");
-                setPage(0);
-                fetchOrders(undefined, 0, 10);
-              }}
+              className="btn btn-secondary"
+              disabled={!selectedId}
+              onClick={() => selectedId && setShowDetail(true)}
             >
-              Xóa lọc
+              Xem chi tiết
             </button>
           </div>
-      </div>
 
-      <div className="card">
-        <div className="card-body p-2">
-          <OrderTable
-            data={orders?.content ?? []}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-          />
+          <div className="card">
+            <div className="card-body p-2">
+              <OrderTable
+                data={orders?.content ?? []}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                onOpenDetail={(id) => { setSelectedId(id); setShowDetail(true); }}
+              />
 
-          <div className="mt-3">
-            <AdminPagination
-              page={orders.number}
-              size={orders.size}
-              totalPages={orders.totalPages}
-              totalElements={orders.totalElements}
-              onChangePage={handleChangePage}
-              tieude="đơn hàng"
-            />
+              {showDetail && selectedId && (
+                <OrderDetailModal
+                  orderId={selectedId}
+                  initial={selected}       // có thể truyền dữ liệu tạm thời
+                  onClose={() => setShowDetail(false)}
+                />
+              )}
+
+              <div className="mt-3">
+                <AdminPagination
+                  page={orders.number}
+                  size={orders.size}
+                  totalPages={orders.totalPages}
+                  totalElements={orders.totalElements}
+                  onChangePage={handleChangePage}
+                  tieude="đơn hàng"
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </main>
+        </main>
       </div >
 
 

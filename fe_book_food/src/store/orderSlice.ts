@@ -305,7 +305,6 @@ const orderSlice = createSlice({
         });
 
         //statistics by days
-        // Fetch all orders
         builder
             .addCase(fetchOrdersByDaysAsync.pending, (state) => {
                 state.loading = true;

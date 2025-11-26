@@ -1,3 +1,4 @@
+import { Page } from "./page";
 import { UserResponse } from "./user";
 
 export enum OrderStatus{
@@ -41,7 +42,7 @@ export interface OrderResponse {
 }
 
 export interface UserOrderResponse{
-    orders: OrderResponse[];
+    orders: Page<OrderResponse>;
     totalOrders: number;
 }
 
