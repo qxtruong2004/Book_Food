@@ -139,14 +139,26 @@ public class OrderController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/by_day")
     public ResponseEntity<ApiResponse<Page<OrderResponse>>> getOrdersByDay
-    ( @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+    (  @RequestParam(required = false) OrderStatus status ,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue ="10") int size)
     {
-        Page<OrderResponse> orders = orderService.getOrdersByDay(startDate, endDate, page, size);
+        Page<OrderResponse> orders = orderService.getOrdersByDay(status, startDate, endDate, page, size);
         return ResponseEntity.ok(ApiResponse.success(orders));
     }
 
+    //số lượng đơn hàng hoan thành
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/totalSuccess_by_day")
+    public ResponseEntity<ApiResponse<Long>> getOrdersSuccessByDay
+    ( @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+     )
+    {
+        Long count = orderService.getCountSuccessByDay(OrderStatus.SUCCEEDED, startDate, endDate);
+        return ResponseEntity.ok(ApiResponse.success(count));
+    }
 
 }

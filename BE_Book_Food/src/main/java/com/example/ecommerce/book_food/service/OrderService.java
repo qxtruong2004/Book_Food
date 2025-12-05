@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -226,7 +227,7 @@ public class OrderService {
 
     //lấy danh sách order ( lọc theo trạng thái, nếu kh có trạng thái thì lấy tất cả )
     public Page<OrderResponse> getAllOrders(OrderStatus orderStatus, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Order> orders;
         if(orderStatus != null) {
             orders = orderRepository.findByStatusOrderByCreatedAtDesc(orderStatus, pageable);
@@ -238,13 +239,28 @@ public class OrderService {
     }
 
     //lấy số lượng đơn hang theo ngay
-    public Page<OrderResponse> getOrdersByDay(LocalDate startdate, LocalDate enddate , int page, int size) {
+    public Page<OrderResponse> getOrdersByDay(OrderStatus orderStatus, LocalDate startdate, LocalDate enddate , int page, int size) {
         LocalDateTime start =  startdate.atStartOfDay();
         LocalDateTime end = enddate.atTime(LocalTime.MAX);
         Pageable pageable = PageRequest.of(page, size);
         Page<Order> orders;
-        orders = orderRepository.getOrdersOnDay(start, end, pageable);
-        return orders.map(orderMapper::convertToOrderResponse);
+        if(orderStatus == null){
+            orders = orderRepository.getOrdersOnDay(null, start, end, pageable);
+        }
+        else{
+            orders = orderRepository.getOrdersOnDay(orderStatus, start, end, pageable);
+        }
 
+        return orders.map(orderMapper::convertToOrderResponse);
+    }
+
+    //lay so lượng đơn hàng thành công trong ngày
+    public Long getCountSuccessByDay(OrderStatus status, LocalDate startdate, LocalDate enddate) {
+        LocalDateTime start =  startdate.atStartOfDay();
+        LocalDateTime end = enddate.atTime(LocalTime.MAX);
+        status = OrderStatus.SUCCEEDED;
+
+        Long totalSuccess = orderRepository.countByStatusAndCreatedAtBetween(status, start, end);
+        return totalSuccess;
     }
 }

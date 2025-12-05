@@ -1,9 +1,6 @@
 package com.example.ecommerce.book_food.mapper;
 
-import com.example.ecommerce.book_food.dto.respone.FoodResponse;
-import com.example.ecommerce.book_food.dto.respone.OrderItemResponse;
-import com.example.ecommerce.book_food.dto.respone.OrderResponse;
-import com.example.ecommerce.book_food.dto.respone.UserResponse;
+import com.example.ecommerce.book_food.dto.respone.*;
 import com.example.ecommerce.book_food.entity.Food;
 import com.example.ecommerce.book_food.entity.Order;
 import com.example.ecommerce.book_food.entity.OrderItem;
@@ -54,6 +51,25 @@ public class OrderMapper {
                 .updatedAt(order.getUpdatedAt())
                 .build();
     }
+
+//    public DashboardResponse convertToDashBoardResponse(Order order){
+//        // Chuyển đổi danh sách OrderItem thủ công
+//        List<OrderItemResponse> itemResponses = order.getOrderItems().stream()
+//                .map(this::convertToOrderItemResponse)
+//                .collect(Collectors.toList());
+//
+//        return DashboardResponse.builder()
+//                .totalOrders()
+//                .totalSucceededOrders()
+//                .totalRevenue()
+//                .totalRevenue_success()
+//                .totalRevenue_pending()
+//                .totalRevenue_failed()
+//                .totalRevenue_preparing()
+//                .totalFoodsSold()
+//                .topFoods()
+//                .build();
+//    }
 
     public OrderResponse convertToOrderResponse(Order order, Set<Long> reviewedSet) {
         List<OrderItemResponse> itemResponses = order.getOrderItems().stream()
@@ -122,4 +138,6 @@ public class OrderMapper {
                 .status(user.getStatus())
                 .build();
     }
+
+    // chuyển
 }

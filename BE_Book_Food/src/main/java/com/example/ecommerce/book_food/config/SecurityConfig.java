@@ -39,7 +39,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/foods/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/reviews/foods/**").permitAll()
-
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
