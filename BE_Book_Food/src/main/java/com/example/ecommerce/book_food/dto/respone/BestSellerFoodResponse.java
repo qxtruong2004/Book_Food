@@ -1,5 +1,6 @@
 package com.example.ecommerce.book_food.dto.respone;
 
+import com.example.ecommerce.book_food.entity.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,9 +13,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BestSellerFoodResponse {
-    private Long foodId;
+    private long foodId;
     private String foodName;
-    private Long quantitySold;
-    private BigDecimal price;
+    private long quantitySold;
+    private String categoryName;
 
 }

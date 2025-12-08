@@ -131,7 +131,7 @@ export const orderService = {
     async getOrdersByDays(statistics: StatisticsOrders, page = 0, size = 10): Promise<Page<OrderResponse> | null>{
         try{
             const response = await api.get<ApiResponse<Page<OrderResponse>>>(
-                API_ENDPOINTS.ORDERS.STATISTICS_BY_DAYS(statistics.startDate, statistics.endDate));
+                API_ENDPOINTS.ORDERS.STATISTICS_BY_DAYS(statistics.startDate, statistics.endDate, statistics.orderStatus));
                 return response.data.data;
         } catch (error) {
             console.error("OrderService error (getOrders):", error);

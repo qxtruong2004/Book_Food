@@ -173,9 +173,9 @@ export const fetchTotalRevenueAsync = createAsyncThunk(
 export const fetchOrdersByDaysAsync = createAsyncThunk("order/fetchOrdersByDays",
     async(params : StatisticsOrders, { rejectWithValue }) =>{
         try{
-            const order = await orderService.getOrdersByDays(params);
-            if (!order) throw new Error("No orders found");
-            return order;
+            const orders = await orderService.getOrdersByDays(params);
+            if (!orders) throw new Error("No orders found");
+            return orders;
         }catch (error: any) {
             return rejectWithValue(error.message || "Failed to fetch orders");
         }

@@ -41,16 +41,16 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     long countByUserId(@Param("userId") Long userId);
 
     // Tính tổng doanh thu ĐÃ NHAN theo khoảng thời gian ( chi tính đơn đã hoàn thành)
-    @Query("SELECT SUM(o.totalAmount) FROM Order o" +
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o" +
             " WHERE o.status = com.example.ecommerce.book_food.Enum.OrderStatus.SUCCEEDED " +
             " AND o.createdAt >= :startDateTime AND o.createdAt <= :endDateTime")
-    BigDecimal getTotalRevenue_Successed_ByDateRange(@Param("startDateTime") LocalDateTime startDateTime,
+    long getTotalRevenue_Successed_ByDateRange(@Param("startDateTime") LocalDateTime startDateTime,
                                           @Param("endDateTime") LocalDateTime endDateTime);
 
     //tính tổng doanh thu theo khoảng time
-    @Query("SELECT SUM(o.totalAmount) FROM Order o" +
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o" +
             " WHERE o.createdAt >= :startDateTime AND o.createdAt <= :endDateTime")
-    BigDecimal getTotalRevenueByDateRange(@Param("startDateTime") LocalDateTime startDateTime,
+    Long getTotalRevenueByDateRange(@Param("startDateTime") LocalDateTime startDateTime,
                                                      @Param("endDateTime") LocalDateTime endDateTime);
     //lấy ds đơn hàng trong 1 khoảng thời gian
     @Query("select o FROM Order o  WHERE o.createdAt  >= :startOfDay AND   o.createdAt <= :endOfDay AND (:status IS NULL OR o.status = :status) order by o.createdAt desc ")
@@ -69,7 +69,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     long countByUser_Username(String username);
 
     //tính tổng số món đã bán (số lượng)
-    @Query("SELECT  sum(oi.quantity) from OrderItem oi " +
+    @Query("SELECT  COALESCE(sum(oi.quantity), 0) from OrderItem oi " +
             "join oi.order o " +
             " where  o.createdAt >= :startDateTime AND   o.createdAt < :endDateTime")
     long getTotalFoodsSoldOutByDateRange(@Param("startDateTime") LocalDateTime startDateTime,
@@ -77,11 +77,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     //lấy tổng số lượng của từng món bán ra từ NHIỀU đơn
     @Query("select new com.example.ecommerce.book_food.dto.respone.BestSellerFoodResponse(" +
-            "oi.food.id, oi.food.name, sum(oi.quantity), oi.unitPrice)" +
+            "oi.food.id, oi.food.name, sum(oi.quantity), oi.food.category.name)" +
             "from  OrderItem oi " +
             "join oi.order o " +
             "where o.createdAt >= :startDateTime AND   o.createdAt < :endDateTime " +
-            "group by oi.food.id, oi.food.name, oi.unitPrice ORDER BY SUM(oi.quantity) DESC")
+            "group by oi.food.id, oi.food.name, oi.food.category.name ORDER BY SUM(oi.quantity) DESC")
     List<BestSellerFoodResponse> findBestSellerFoods(LocalDateTime startDateTime, LocalDateTime endDateTime);
 
 }

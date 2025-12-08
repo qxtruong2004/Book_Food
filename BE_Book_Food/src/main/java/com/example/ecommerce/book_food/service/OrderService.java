@@ -167,7 +167,7 @@ public class OrderService {
 
 
     //tính tổng doanh thu đơn hàng theo thời giann
-    public BigDecimal getTotalRevenueByDateRange(LocalDate startDate, LocalDate endDate) {
+    public long getTotalRevenueByDateRange(LocalDate startDate, LocalDate endDate) {
         // Kiểm tra đầu vào
         if (startDate == null || endDate == null) {
             throw new IllegalArgumentException("Start date and end date cannot be null");
@@ -180,9 +180,9 @@ public class OrderService {
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
-        BigDecimal totalRevenue = orderRepository.getTotalRevenueByDateRange(startDateTime, endDateTime);
+        long totalRevenue = orderRepository.getTotalRevenueByDateRange(startDateTime, endDateTime);
 
-        return totalRevenue != null ? totalRevenue : BigDecimal.ZERO;
+        return totalRevenue;
     }
 
     //lấy chi tiet đơn hàng( admin)

@@ -8,6 +8,7 @@ import reviewReducer from "./reviewSlice";
 import uiReducer from "./uiSlice";
 import categoryReducer from "./categorySlice";
 import authReducer from "./authSlice";
+import dashBoardReducer from "./dashBoardSlice"
 
 export const store = configureStore({
     reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
         ui: uiReducer,
         category: categoryReducer,
         auth: authReducer,
+        dashBoard: dashBoardReducer
     },
     middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

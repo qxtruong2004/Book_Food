@@ -56,9 +56,9 @@ public class DashBoardService {
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
-        BigDecimal totalRevenue = orderRepository.getTotalRevenueByDateRange(startDateTime, endDateTime);
-        BigDecimal revenueSucceeded = orderRepository.getTotalRevenue_Successed_ByDateRange(startDateTime, endDateTime);
-        BigDecimal revenueWaiting = totalRevenue.subtract(revenueSucceeded);
+        long totalRevenue = orderRepository.getTotalRevenueByDateRange(startDateTime, endDateTime);
+        long revenueSucceeded = orderRepository.getTotalRevenue_Successed_ByDateRange(startDateTime, endDateTime);
+        long revenueWaiting = totalRevenue - revenueSucceeded;
 
         return new DashboardRevenueStatsResponse(totalRevenue, revenueSucceeded, revenueWaiting);
     }

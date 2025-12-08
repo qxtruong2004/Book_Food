@@ -73,4 +73,5 @@ export type DraftItem = {
 export interface StatisticsOrders{
   startDate: string;
   endDate: string;
+  orderStatus?: OrderStatus;
 }

@@ -19,7 +19,7 @@ public class DashBoardController {
 
     private final DashBoardService dashBoardService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping()
     public ResponseEntity<ApiResponse<DashboardResponse>> getDashboard(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,

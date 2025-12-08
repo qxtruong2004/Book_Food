@@ -91,11 +91,11 @@ public class OrderController {
     //tính tổng doanh thu
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/totalRevenue")
-    public ResponseEntity<ApiResponse<BigDecimal>> getTotalRevenue(
+    public ResponseEntity<ApiResponse<Long>> getTotalRevenue(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
-        BigDecimal total = orderService.getTotalRevenueByDateRange(startDate, endDate);
+        long total = orderService.getTotalRevenueByDateRange(startDate, endDate);
         return ResponseEntity.ok(ApiResponse.success(total));
     }
 

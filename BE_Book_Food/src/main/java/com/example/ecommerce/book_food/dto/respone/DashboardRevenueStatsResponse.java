@@ -12,8 +12,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class DashboardRevenueStatsResponse {
     // thong ke doanh thu
-    private BigDecimal totalRevenue;
-    private BigDecimal revenueSucceeded;
-    private BigDecimal revenueWaiting;
+    private long totalRevenue;
+    private long revenueSucceeded;
+    private long revenueWaiting;
 
 }

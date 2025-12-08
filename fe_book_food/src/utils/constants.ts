@@ -1,5 +1,7 @@
 //định nghĩa các hằng số quan trọng
 
+import { OrderStatus } from "../types/order";
+
 //API Base URl
 export const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api";
 
@@ -67,7 +69,18 @@ export const API_ENDPOINTS = {
 
         MY_ORDERS: `/orders/my_orders`, // page, size gửi bằng params
         MY_ORDER_DETAIL: (orderId: number) => `/orders/my_orders/${orderId}`,
-        STATISTICS_BY_DAYS: (startDate: string, endDate: string) => `/orders/by_day?startDate=${startDate}&endDate=${endDate}`
+        STATISTICS_BY_DAYS: (startDate: string, endDate: string, status?: OrderStatus): string => {
+            const params = new URLSearchParams();
+            params.append('startDate', startDate);
+            params.append('endDate', endDate);
+             if (status) { //chỉ thêm nếu có giá trị
+                params.append('status', status)
+            }
+            return `/orders/by_day?${params.toString()}`
+        }
+    },
+    DASHBOARD: {
+        STATISTICS:`/dashboard`
     },
     REVIEWS: {
         BASE: "/reviews",
@@ -91,7 +104,7 @@ export const API_ENDPOINTS = {
 export const ROUTES = {
     // Public
     //home = foodpage
-    HOME: "/", 
+    HOME: "/",
     CATEGORY: "/category",
 
     foodDetail: (id: number | string) => `/foods/${id}`,
@@ -119,9 +132,9 @@ export const ROUTES = {
 };
 
 export const ROUTE_PATTERNS = {
-  FOOD_DETAIL: "/foods/:id",
-  ORDER_DETAL: "/orders/:id",
-  REVIEW_DETAIL: "my_reviews/:userId"
+    FOOD_DETAIL: "/foods/:id",
+    ORDER_DETAL: "/orders/:id",
+    REVIEW_DETAIL: "my_reviews/:userId"
 };
 
 
