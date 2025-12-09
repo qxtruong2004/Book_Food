@@ -1,12 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { api } from "../../services/api";
 import { getDateRange } from "../../utils/dateRange";
-import {
-    ResponsiveContainer,
-    LineChart, Line,
-    CartesianGrid, XAxis, YAxis, Tooltip, Legend
-} from "recharts";
-import { useOrder } from "../../hooks/useOrder";
 import { formatCurrency } from "../../utils/helpers";
 import { useDashBoard } from "../../hooks/useDashBoard";
 
@@ -26,11 +20,7 @@ export default function Dashboard() {
     const [to, setTo] = useState(getDateRange(7).to);
 
     const { dashboard, fetchDashBoard } = useDashBoard();
-    const [data, setData] = useState<OverviewResp | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState<string | null>(null);
-    const [orderSuccess, setOrderSuccess] = useState(() => {
-    })
+
 
     const canLoad = useMemo(() => {
         // đảm bảo from <= to
@@ -63,8 +53,6 @@ export default function Dashboard() {
         setSelectedDate(e.target.value);
     };
 
-    const { orders, totalRevenue, fetchTotalRevenue, fetchOrdersByDays } = useOrder();
-
     // load khi đổi ngày lọc
     useEffect(() => {
         fetchDashBoard(selectedDate, selectedDate)
@@ -90,79 +78,99 @@ export default function Dashboard() {
             <div className="container-fluid">
                 {/* Tổng quan Cards */}
                 <div className="row mb-7">
-                    <div className="col-md mb-3">
-                        <div className="card border-0 shadow-sm h-100" style={{ backgroundColor: "#e8f5e8" }}>
-                            <div className="card-body text-center">
-                                <h6 className="card-title text-success">Số lượng đơn</h6>
-                                <h3 className="text-dark ">{dashboard?.orderStats.totalOrders}</h3>
+                    <div className="row">
+                        <div className="row">
+                            {/* 1. Số lượng đơn */}
+                            <div className="col-md mb-3">
+                                <div className="card border-0 shadow-sm h-100 bg-primary bg-opacity-10">
+                                    <div className="card-body text-center">
+                                        <h6 className="card-title text-primary fw-semibold">Số lượng đơn</h6>
+                                        <h3 className="text-dark fw-bold">{dashboard?.orderStats.totalOrders}</h3>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div className="col-md mb-3">
-                        <div className="card border-0 shadow-sm h-100" style={{ backgroundColor: "#e8f5e8" }}>
-                            <div className="card-body text-center">
-                                <h6 className="card-title text-success">Số món đã bán</h6>
-                                <h3 className="text-dark ">{dashboard?.foodStats.totalFoodsSold}</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-md mb-3">
-                        <div className="card border-0 shadow-sm h-100" style={{ backgroundColor: "#e8f5e8" }}>
-                            <div className="card-body text-center">
-                                <h6 className="card-title text-success">Đơn hoàn thành</h6>
-                                <h3 className="text-dark ">{dashboard?.orderStats.totalSucceededOrders}</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-md mb-3">
-                        <div className="card border-0 shadow-sm h-100" style={{ backgroundColor: "#e8f5e8" }}>
-                            <div className="card-body text-center">
-                                <h6 className="card-title text-success">Đơn chuẩn bị</h6>
-                                <h3 className="text-dark ">{dashboard?.orderStats.totalPending}</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-md mb-3">
-                        <div className="card border-0 shadow-sm h-100" style={{ backgroundColor: "#e8f5e8" }}>
-                            <div className="card-body text-center">
-                                <h6 className="card-title text-success">Đơn chờ giao</h6>
-                                <h3 className="text-dark ">{dashboard?.orderStats.totalPreparing}</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-md mb-3">
-                        <div className="card border-0 shadow-sm h-100" style={{ backgroundColor: "#e8f5e8" }}>
-                            <div className="card-body text-center">
-                                <h6 className="card-title text-success">Đơn bị hủy</h6>
-                                <h3 className="text-dark ">{dashboard?.orderStats.totalFailed}</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                {/* Thống kê Doanh thu */}
-                <div className="row">
-                    <div className="col-md-4 mb-3">
-                        <div className="card border-0 shadow-sm h-100" style={{ backgroundColor: "#e8f5e8" }}>
-                            <div className="card-body text-center">
-                                <h6 className="card-title text-success">Tổng doanh thu</h6>
-                                <h3 className="text-dark">{formatCurrency(dashboard?.revenueStats.totalRevenue)}</h3>
+                            {/* 2. Số món đã bán */}
+                            <div className="col-md mb-3">
+                                <div className="card border-0 shadow-sm h-100 bg-info bg-opacity-10">
+                                    <div className="card-body text-center">
+                                        <h6 className="card-title text-info fw-semibold">Số món đã bán</h6>
+                                        <h3 className="text-dark fw-bold">{dashboard?.foodStats.totalFoodsSold}</h3>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 3. Đơn hoàn thành công */}
+                            <div className="col-md mb-3">
+                                <div className="card border-0 shadow-sm h-100 bg-success bg-opacity-10">
+                                    <div className="card-body text-center">
+                                        <h6 className="card-title text-success fw-semibold">Đơn hoàn thành</h6>
+                                        <h3 className="text-success fw-bold">{dashboard?.orderStats.totalSucceededOrders}</h3>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 4. Đơn chuẩn bị (đang chờ) */}
+                            <div className="col-md mb-3">
+                                <div className="card border-0 shadow-sm h-100 bg-warning bg-opacity-10">
+                                    <div className="card-body text-center">
+                                        <h6 className="card-title text-orange fw-semibold">Đơn chuẩn bị</h6>
+                                        <h3 className="text-orange fw-bold">{dashboard?.orderStats.totalPending}</h3>
+                                    </div>  
+                                </div>
+                            </div>
+
+                            {/* 5. Đơn chờ giao */}
+                            <div className="col-md mb-3">
+                                <div className="card border-0 shadow-sm h-100 bg-primary bg-opacity-10">
+                                    <div className="card-body text-center">
+                                        <h6 className="card-title text-primary fw-semibold">Đơn chờ giao</h6>
+                                        <h3 className="text-primary fw-bold">{dashboard?.orderStats.totalPreparing}</h3>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 6. Đơn bị hủy */}
+                            <div className="col-md mb-3">
+                                <div className="card border-0 shadow-sm h-100 bg-danger bg-opacity-10">
+                                    <div className="card-body text-center">
+                                        <h6 className="card-title text-danger fw-semibold">Đơn bị hủy</h6>
+                                        <h3 className="text-danger fw-bold">{dashboard?.orderStats.totalFailed}</h3>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="col-md-4 mb-3">
-                        <div className="card border-0 shadow-sm h-100" style={{ backgroundColor: "#e8f5e8" }}>
-                            <div className="card-body text-center">
-                                <h6 className="card-title text-success">Doanh thu chờ xác nhận</h6>
-                                <h3 className="text-dark">{formatCurrency(dashboard?.revenueStats.revenueWaiting)}</h3>
+
+                        {/* Thống kê Doanh thu */}
+                        <div className="row mt-4">
+                            {/* Tổng doanh thu */}
+                            <div className="col-md-4 mb-3">
+                                <div className="card border-0 shadow-sm h-100 bg-success bg-gradient text-white">
+                                    <div className="card-body text-center">
+                                        <h6 className="card-title fw-semibold">Tổng doanh thu</h6>
+                                        <h3 className="fw-bold">{formatCurrency(dashboard?.revenueStats.totalRevenue)}</h3>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div className="col-md-4 mb-3">
-                        <div className="card border-0 shadow-sm h-100" style={{ backgroundColor: "#e8f5e8" }}>
-                            <div className="card-body text-center">
-                                <h6 className="card-title text-success">Doanh thu đã xác nhận</h6>
-                                <h3 className="text-dark">{formatCurrency(dashboard?.revenueStats.revenueSucceeded)}</h3>
+
+                            {/* Doanh thu chờ xác nhận */}
+                            <div className="col-md-4 mb-3">
+                                <div className="card border-0 shadow-sm h-100 bg-warning bg-opacity-10">
+                                    <div className="card-body text-center">
+                                        <h6 className="card-title text-orange fw-semibold">Doanh thu chờ xác nhận</h6>
+                                        <h3 className="text-orange fw-bold">{formatCurrency(dashboard?.revenueStats.revenueWaiting)}</h3>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Doanh thu đã xác nhận */}
+                            <div className="col-md-4 mb-3">
+                                <div className="card border-0 shadow-sm h-100 bg-success bg-opacity-10">
+                                    <div className="card-body text-center">
+                                        <h6 className="card-title text-success fw-semibold">Doanh thu đã xác nhận</h6>
+                                        <h3 className="text-success fw-bold">{formatCurrency(dashboard?.revenueStats.revenueSucceeded)}</h3>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

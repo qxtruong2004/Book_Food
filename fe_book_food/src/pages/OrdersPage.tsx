@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useOrder } from "../hooks/useOrder";
-import type { OrderResponse } from "../types/order";
+import type { OrderResponse, OrderStatus } from "../types/order";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../utils/constants";
 
@@ -12,6 +12,13 @@ export default function OrdersPage() {
   useEffect(() => {
     fetchMyOrders(0, 10);
   }, [fetchMyOrders]);
+
+  const bootstrapColors: Record<OrderStatus, string> = {
+          PENDING: "bg-warning text-dark",
+          PREPARING: "bg-primary",
+          SUCCEEDED: "bg-success",
+          FAILED: "bg-danger",
+      };
 
   if (loading) return <div className="container py-4">Đang tải...</div>;
 
@@ -38,7 +45,7 @@ export default function OrdersPage() {
                   <tr key={o.id}>
                     <td>{o.orderNumber}</td>
                     <td>{new Date(o.createdAt).toLocaleString("vi-VN")}</td>
-                    <td>{o.status}</td>
+                    <td><span className={`badge ${bootstrapColors[o.status]}`}>{o.status}</span></td>
                     <td>{o.totalAmount.toLocaleString("vi-VN")}₫</td>
                     <td><Link to={ROUTES.orderDetail(o.id)} className="btn btn-sm btn-outline-primary">Xem</Link></td>
                   </tr>

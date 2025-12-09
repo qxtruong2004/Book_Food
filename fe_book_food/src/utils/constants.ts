@@ -116,6 +116,8 @@ export const ROUTES = {
     LOGIN: "/login",
     REGISTER: "/register",
 
+    ABOUT_US: "/about-us",
+
     // User
     ORDERS: "/orders", // trang lịch sử đơn hàng user
     orderDetail: (id: number | string) => `/orders/${id}`,

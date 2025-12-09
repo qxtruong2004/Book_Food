@@ -42,6 +42,8 @@ public interface FoodRepository extends JpaRepository<Food, Long> {
     @Query("SELECT f FROM Food f WHERE f.name LIKE %:keyword% AND f.isAvailable = :trangthai ORDER BY f.createdAt DESC")
     Page<Food> findByNameContainingAndAvailable(String keyword, boolean trangthai, Pageable pageable);
 
+
+    //tự đọng cập nhât món ăn đã bán
     @Modifying
     @Query("UPDATE  Food f set f.soldCount = f.soldCount + :delta where  f.id = :foodId")
     void incrementSoldCount(@Param("foodId") Long foodId, @Param("delta") long delta) ;

@@ -47,6 +47,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     long getTotalRevenue_Successed_ByDateRange(@Param("startDateTime") LocalDateTime startDateTime,
                                           @Param("endDateTime") LocalDateTime endDateTime);
 
+    //tính tổng doanh thu đã bị hủy theo khoảng time
+    @Query("select  coalesce(sum(o.totalAmount), 0) from Order o " +
+            "where o.status = com.example.ecommerce.book_food.Enum.OrderStatus.FAILED " +
+            "and o.createdAt >= :startDateTime AND o.createdAt <= :endDateTime")
+    long getTotalRevenue_Failed_ByDateRange(@Param("startDateTime") LocalDateTime startDateTime,
+                                            @Param("endDateTime") LocalDateTime endDateTime);
+
     //tính tổng doanh thu theo khoảng time
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o" +
             " WHERE o.createdAt >= :startDateTime AND o.createdAt <= :endDateTime")

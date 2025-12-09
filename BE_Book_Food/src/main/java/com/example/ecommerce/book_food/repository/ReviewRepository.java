@@ -23,8 +23,13 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByUser_Username(String username);
 
     // Tính trung bình rating của 1 món ăn
-    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.food.id = :foodId")
+    @Query(value = """
+    SELECT COALESCE(ROUND(AVG(rating), 1), 0.0) 
+    FROM reviews 
+    WHERE food_id = :foodId
+    """, nativeQuery = true)
     Double getAverageRatingByFood(@Param("foodId") Long foodId);
+
 
     // Đếm số review của một món ăn
     long countByFoodId(Long foodId);

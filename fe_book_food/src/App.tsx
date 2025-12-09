@@ -36,6 +36,7 @@ import AdminCategoryPage from './pages/admin/AdminCategoryPage';
 import AdminUserPage from './pages/admin/AdminUserPage';
 import AdminFoodPage from './pages/admin/AdminFoodPage';
 import AdminOrderPage from './pages/admin/AdminOrderPage';
+import AboutWebPage from './pages/AboutWebPage';
 
 
 const BuggyComponent = () => {
@@ -68,7 +69,9 @@ function App() {
             {/* các route còn lại giữ nguyên */}
             <Route path={ROUTES.CATEGORY} element={<CategoryPage />} />
             <Route path={ROUTES.REVIEW} element={<ReviewsPage />} />
+            <Route path={ROUTES.ABOUT_US} element={<AboutWebPage />} />
             <Route path={ROUTE_PATTERNS.FOOD_DETAIL} element={<FoodDetailsPage />} />
+
 
             {/* Đặt hàng */}
             <Route path={ROUTES.CHECKOUT} element={<PrivateRoute><CheckoutPage /></PrivateRoute>} />

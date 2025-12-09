@@ -58,7 +58,8 @@ public class DashBoardService {
 
         long totalRevenue = orderRepository.getTotalRevenueByDateRange(startDateTime, endDateTime);
         long revenueSucceeded = orderRepository.getTotalRevenue_Successed_ByDateRange(startDateTime, endDateTime);
-        long revenueWaiting = totalRevenue - revenueSucceeded;
+        long revenueFailed = orderRepository.getTotalRevenue_Failed_ByDateRange(startDateTime, endDateTime);
+        long revenueWaiting = totalRevenue - revenueSucceeded - revenueFailed;
 
         return new DashboardRevenueStatsResponse(totalRevenue, revenueSucceeded, revenueWaiting);
     }

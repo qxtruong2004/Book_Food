@@ -130,6 +130,8 @@ public class ReviewService {
 //        Double averageRating = reviewRepository.getAverageRatingByFood(foodId);
 //        return averageRating != null ? averageRating : 0.0;
 //    }
+
+    //tính rating trung bình của móna ăn
     public FoodRatingSummaryRespone getFoodRatingSummary(Long foodId) throws FoodNotFoundException {
         boolean exists = foodRepository.existsById(foodId);
         if(!exists){
